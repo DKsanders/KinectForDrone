@@ -1,0 +1,21 @@
+# Start running ROS
+roscore
+
+# Start kinect
+roslaunch opennni_launch openni.launch
+
+# Reconfigure
+rosrun rqt_reconfigure rqt_reconfigure
+## Set camera -> driver -> depth_registration on
+
+# Run ar_kinect
+roslaunch drone kinect.launch
+
+# Run data processor
+rosrun drone data_processor
+
+## If visualizing
+roslaunch drone visualize.launch
+
+## Checking the camera
+rosrun image_view image_view image:=/camera/rgb/image_color

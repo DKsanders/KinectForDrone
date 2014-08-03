@@ -1,0 +1,44 @@
+#the number of patterns to be recognized
+3
+
+#pattern 1
+BLACK
+data/my_markers/black.pat
+70.0
+0.0 0.0
+
+#pattern 2
+BLUE
+data/my_markers/blue.pat
+70.0
+0.0 0.0
+
+#pattern 3
+RED
+data/my_markers/red.pat
+70.0
+0.0 0.0
+
+#pattern 1
+#PATTERN_ONE
+#data/my_markers/one.pat
+#32.0
+#0.0 0.0
+
+#pattern 2
+#PATTERN_TWO
+#data/my_markers/two.pat
+#32.0
+#0.0 0.0
+
+#pattern 3
+#PATTERN_THREE
+#data/my_markers/three.pat
+#32.0
+#0.0 0.0
+
+#pattern 1
+#PATTERN_FOUR
+#data/my_markers/four.pat
+#32.0
+#0.0 0.0
