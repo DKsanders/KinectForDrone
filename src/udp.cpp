@@ -1,5 +1,6 @@
 // Constants defined in communication.h and udp.h
 
+#include "network/udp.h"
 #include <sys/time.h>
 #include <arpa/inet.h>
 #include <stdio.h>
@@ -11,8 +12,6 @@
 #include <fcntl.h>
 #include <netinet/in.h>
 #include <errno.h>
-#include "network/udp.h"
-
 using namespace std;
 
 Server_UDP::Server_UDP(){
@@ -72,14 +71,17 @@ int Server_UDP::send(const char* msg, const size_t length){
 
 // receives a message terminated by '\n'
 int Server_UDP::receive(){
-    socklen_t slen = sizeof(clientAddr);
+    // Clear buffer
     memset(buf, 0, sizeof buf);
-    ssize_t bytes = recvfrom(clientSock, buf, sizeof buf, 0, (sockaddr*)&clientAddr, &slen);
+    ssize_t bytes;
+    socklen_t slen = sizeof(clientAddr);
+
+    // Read actual msg
+    bytes = recvfrom(clientSock, buf, sizeof buf, 0, (sockaddr*)&clientAddr, &slen);
     if(bytes < 0){
         perror("Receiving unsuccessful");
         return 1;
     }
-    //buf[bytes] = '\0';
     return 0;
 }
 
@@ -119,7 +121,7 @@ int Client_UDP::init(const char* host, const int port){
 
 // Sends a message terminated by '\n'
 int Client_UDP::send(const char* msg, const size_t length){
-    
+
     socklen_t slen = sizeof(serverAddr);
     ssize_t sent = sendto(sockfd, msg, length, 0, (const sockaddr*)&serverAddr, slen);
     if (sent < 0){

@@ -108,6 +108,7 @@ int Server_TCP::receive(){
         return 1;
     }
     readFromStream(msgSizeBuf, msgSize);
+    
     // Done reading message size; Read one byte from scoket
     while (msgSize > 1){
         bytes = recv(clientSock, _buf, msgSize, 0);

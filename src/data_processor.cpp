@@ -8,7 +8,7 @@
 #include <pthread.h>
 using namespace std;
 
-#define CONFIG_FILE "catkin_ws/src/drone/run/default.config"
+#define CONFIG_FILE "/home/sander57/catkin_ws/src/drone/run/default.config"
 
 pthread_mutex_t sharedDataLock;
 
