@@ -93,13 +93,14 @@ namespace drone {
             // Process data
             DroneData* data = processDataToDrone(msg, seq+1);
             int buf_size;
-            char* str = data2str(data, buf_size);
+            char* buf;
+            serialize(data, buf, buf_size);
             // Send the message
-            if (client->send(str, buf_size)) {
+            if (client->send(buf, buf_size)) {
                 // Couldn't send
                 ROS_INFO("failed to send to drone");
             }
-            free(str);
+            delete [] buf;
             seq += 1;    
         }
     }

@@ -85,15 +85,15 @@ int Server_TCP::listen(){
 }
 
 
-// Sends a message terminated by '\n'
+// Sends a message
 int Server_TCP::send(const char* msg, const size_t length){
     return 0;
 }
 
-// receives a message terminated by '\n'
+// receives a message
 int Server_TCP::receive(){
     // For storing msg size
-    char* msgSizeBuf = (char*)malloc(sizeof(char)*sizeof(int));
+    char* msgSizeBuf = new char[(sizeof(char)*sizeof(int))];
     int msgSize;
     
     // Clear buffer
@@ -119,7 +119,7 @@ int Server_TCP::receive(){
         }
         msgSize = msgSize - bytes;
     }
-    free(msgSizeBuf);
+    delete [] msgSizeBuf;
     return 0;
 }
 
@@ -184,10 +184,10 @@ int Client_TCP::init(const char* host, const int port){
 // Sends a message terminated by '\n'
 int Client_TCP::send(const char* msg, const size_t length){
     // Create a message; number of bytes in stream indicated at the head of buffer
-    char* totalMsg = (char*)malloc(sizeof(char)*(length+sizeof(int))); // buffer
-    int offset = 0;
-    offset += write2stream(totalMsg+offset, (int)length); // msg size
-    offset += write2stream(totalMsg+offset, msg, length); // actual msg
+    char* totalMsg = new char[(sizeof(char)*(length+sizeof(int)))]; // buffer
+    char* current = totalMsg;
+    current += write2stream(current, (int)length); // msg size
+    current += write2stream(current, msg, (int)length); // actual msg
     size_t tosend = length + sizeof(int); // bytes needed to be sent
 
     // Start sending

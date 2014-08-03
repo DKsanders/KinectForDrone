@@ -34,56 +34,53 @@ RotationMatrix* quat2rm(Quaternion* quat){
 }
 
 // Converts DroneData into a string of bytes; return string must be freed
-char* data2str(const DroneData* data, int & buf_size){
+void serialize(const DroneData* data, char*& buf, int & buf_size){
     // Initialize
-    char* buf = (char*)malloc(sizeof(char)*MAX_BUF_SIZE); // buffer for storing data
-    int offset = 0; // offset to keep track of where to write to
+    buf = new char[MAX_BUF_SIZE]; // buffer for storing data
+    char* current = buf; // keeps track of where to write in buffer
 
     // Write to stream
-    offset += write2stream(buf+offset, data->seq);
-    offset += write2stream(buf+offset, data->dist_x);
-    offset += write2stream(buf+offset, data->dist_y);
-    offset += write2stream(buf+offset, data->dist_z);
-    offset += write2stream(buf+offset, data->rm->matrix[0][0]);
-    offset += write2stream(buf+offset, data->rm->matrix[0][1]);
-    offset += write2stream(buf+offset, data->rm->matrix[0][2]);
-    offset += write2stream(buf+offset, data->rm->matrix[1][0]);
-    offset += write2stream(buf+offset, data->rm->matrix[1][1]);
-    offset += write2stream(buf+offset, data->rm->matrix[1][2]);
-    offset += write2stream(buf+offset, data->rm->matrix[2][0]);
-    offset += write2stream(buf+offset, data->rm->matrix[2][1]);
-    offset += write2stream(buf+offset, data->rm->matrix[2][2]);
-    offset += write2stream(buf+offset, data->comment.c_str());
+    current += write2stream(current, data->seq);
+    current += write2stream(current, data->dist_x);
+    current += write2stream(current, data->dist_y);
+    current += write2stream(current, data->dist_z);
+    current += write2stream(current, data->rm->matrix[0][0]);
+    current += write2stream(current, data->rm->matrix[0][1]);
+    current += write2stream(current, data->rm->matrix[0][2]);
+    current += write2stream(current, data->rm->matrix[1][0]);
+    current += write2stream(current, data->rm->matrix[1][1]);
+    current += write2stream(current, data->rm->matrix[1][2]);
+    current += write2stream(current, data->rm->matrix[2][0]);
+    current += write2stream(current, data->rm->matrix[2][1]);
+    current += write2stream(current, data->rm->matrix[2][2]);
+    current += write2stream(current, data->comment.c_str());
 
-    buf_size = offset;
-    return buf;
+    buf_size = current-buf;
+    return;
 }
 
 // Converts a string of bytes into DroneData
-DroneData* str2data(const char* msg){
+DroneData* deserialize(const char* msg){
     // Initialize
-    char* buf = (char*)malloc(sizeof(char)*MAX_BUF_SIZE);
-    memcpy(buf, msg, MAX_BUF_SIZE);
-    int offset = 0;
+    char* current = const_cast<char*>(msg);
     DroneData* data = new DroneData;
 
     // Read from stream
-    offset += readFromStream(buf+offset, data->seq);
-    offset += readFromStream(buf+offset, data->dist_x);
-    offset += readFromStream(buf+offset, data->dist_y);
-    offset += readFromStream(buf+offset, data->dist_z);
-    offset += readFromStream(buf+offset, data->rm->matrix[0][0]);
-    offset += readFromStream(buf+offset, data->rm->matrix[0][1]);
-    offset += readFromStream(buf+offset, data->rm->matrix[0][2]);
-    offset += readFromStream(buf+offset, data->rm->matrix[1][0]);
-    offset += readFromStream(buf+offset, data->rm->matrix[1][1]);
-    offset += readFromStream(buf+offset, data->rm->matrix[1][2]);
-    offset += readFromStream(buf+offset, data->rm->matrix[2][0]);
-    offset += readFromStream(buf+offset, data->rm->matrix[2][1]);
-    offset += readFromStream(buf+offset, data->rm->matrix[2][2]);
-    offset += readFromStream(buf+offset, data->comment);
+    current += readFromStream(current, data->seq);
+    current += readFromStream(current, data->dist_x);
+    current += readFromStream(current, data->dist_y);
+    current += readFromStream(current, data->dist_z);
+    current += readFromStream(current, data->rm->matrix[0][0]);
+    current += readFromStream(current, data->rm->matrix[0][1]);
+    current += readFromStream(current, data->rm->matrix[0][2]);
+    current += readFromStream(current, data->rm->matrix[1][0]);
+    current += readFromStream(current, data->rm->matrix[1][1]);
+    current += readFromStream(current, data->rm->matrix[1][2]);
+    current += readFromStream(current, data->rm->matrix[2][0]);
+    current += readFromStream(current, data->rm->matrix[2][1]);
+    current += readFromStream(current, data->rm->matrix[2][2]);
+    current += readFromStream(current, data->comment);
 
-    free(buf);
     return data;
 }
 

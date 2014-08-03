@@ -47,9 +47,9 @@ typedef struct SharedData{
 RotationMatrix* quat2rm(Quaternion* quat); 
 
 // Converts DroneData into a string of bytes
-char* data2str(const DroneData* data, int & buf_size);
+void serialize(const DroneData* data, char*& buf, int & buf_size);
 // Converts a string of bytes into DroneData
-DroneData* str2data(const char* msg);
+DroneData* deserialize(const char* msg);
 // Prints the type DroneData to the screen
 void printData(const DroneData* data);
 
