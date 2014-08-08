@@ -1,15 +1,22 @@
 /**
- * This program processes messages of type ARMarkers
+ * This file (data_processor.cpp) is the main file for the tracking system.
+ *
+ * It tracks markers on the drone using the Microsoft Kinect (c),
+ * proccesses the data to estimate the attitude of the drone,
+ * and sends the data to the drone via wifi. 
+ *
+ * Author: David Sanders <david.sanders@mail.utoronto.ca>
  */
+
 
 // ROS libs
 #include "drone/data_processor.h"
 #include <sstream>
 #include <pthread.h>
+#include <ros/package.h>
 using namespace std;
 
-#define CONFIG_FILE "/home/sander57/catkin_ws/src/drone/run/default.config"
-
+// Lock for shared data
 pthread_mutex_t sharedDataLock;
 
 int main (int argc, char **argv)
@@ -36,42 +43,43 @@ namespace drone {
         client = NULL;
         pthread_t clientThreadID, serverThreadID; // thread IDs
         
-        params = readConfig(CONFIG_FILE);
-        if(params == NULL){
-            cout << "error reading config file" << endl;
-        }
-        if(!params->clientOff){
-            if(clientInit(client, params->clientHost, params->clientPort, params->clientType)!=0) {
-                cout << "error initializing client" << endl;
-            }
-            pthread_create(&clientThreadID, NULL, spin, NULL);
-        } else {
-            cout << "CLIENT: OFF" << endl;
-        }
-        if(!params->serverOff){
-            if(serverInit(server, params->serverHost, params->serverPort, params->serverType)!=0) {
-                cout << "error initializing server" << endl;
-            }
-            pthread_create(&serverThreadID, NULL, processDataFromDrone, (void*)(this));
-        } else {
-            cout << "SERVER: OFF" << endl;
-        }
         // Get parameters
-        std::string path;
-        //std::string package_path = ros::package::getPath (ROS_PACKAGE_NAME);
+        string package_path = ros::package::getPath (ROS_PACKAGE_NAME);
         ros::NodeHandle n_param ("~");
         XmlRpc::XmlRpcValue param_center;
+
+        string path;
+        if (!n_param.getParam ("network_configuration", path)){
+            network_config = package_path + "/config/network.config";
+        }else{
+            network_config = path;
+        }
 
         // Subscribe to topics
         ar_pose_markers_sub = n.subscribe("ar_pose_markers", SUB_BUFFER_SIZE, &DataProcessor::arPoseMarkersCallback, this);
 
-        // Request services
-  
-        // Respond to services
+        // Run server and client
+        params = readConfig(network_config.c_str());
+        if(params == NULL){
+            cout << "error reading config file" << endl;
+        }
+        if(!params->clientOff){
+            pthread_create(&clientThreadID, NULL, runClient, this);
+        } else {
+            cout << "CLIENT: OFF" << endl;
+        }
+        if(!params->serverOff){
+            pthread_create(&serverThreadID, NULL, runServer, this);
+        } else {
+            cout << "SERVER: OFF" << endl;
+        }
     }
 
     DataProcessor::~DataProcessor(){
-        
+        delete sharedData;
+        delete server;
+        delete client;
+        delete params;
     }
 
     void DataProcessor::arPoseMarkersCallback(const drone::ARMarkers::ConstPtr &msg)
@@ -100,6 +108,7 @@ namespace drone {
                 // Couldn't send
                 ROS_INFO("failed to send to drone");
             }
+            delete data;
             delete [] buf;
             seq += 1;    
         }
@@ -108,32 +117,29 @@ namespace drone {
     DroneData* DataProcessor::processDataToDrone(const drone::ARMarkers::ConstPtr &msg, const int seq){
         // Interpret marker data
         DroneData* data = new DroneData;
-
-        // example
-        Quaternion* quat = new Quaternion;
-        quat -> w = seq/1000.0;
-        quat -> x = seq/1000.0;
-        quat -> y = seq/1000.0;
-        quat -> z = seq/1000.0;
-
         data -> seq = seq;
-        data -> dist_x = seq/1000.0;
-        data -> dist_y = seq/1000.0;
-        data -> dist_z = seq/1000.0;
-        data -> comment = "comment";
+        int markerNum = msg -> markers.size();
 
-        data -> rm -> matrix[0][0] = seq/1000.0;
-        data -> rm -> matrix[0][1] = seq/1000.0;
-        data -> rm -> matrix[0][2] = seq/1000.0;
-        data -> rm -> matrix[1][0] = seq/1000.0;
-        data -> rm -> matrix[1][1] = seq/1000.0;
-        data -> rm -> matrix[1][2] = seq/1000.0;
-        data -> rm -> matrix[2][0] = seq/1000.0;
-        data -> rm -> matrix[2][1] = seq/1000.0;
-        data -> rm -> matrix[2][2] = seq/1000.0;
+        // Process data of each marker
+        int i;
+        for (i = 0; i < markerNum; i++){
+            Quaternion* quat = new Quaternion;
+            int type = (int) (msg -> markers[i].id); // starts from 0
 
-        printData(data);
+            data -> dist_x = msg -> markers[i].pose.pose.position.x;
+            data -> dist_y = msg -> markers[i].pose.pose.position.y;
+            data -> dist_z = msg -> markers[i].pose.pose.position.z;
 
+            quat -> x = msg -> markers[i].pose.pose.orientation.x;
+            quat -> y = msg -> markers[i].pose.pose.orientation.y;
+            quat -> z = msg -> markers[i].pose.pose.orientation.z;
+            quat -> w = msg -> markers[i].pose.pose.orientation.w;
+
+            delete data->rm;
+            data->rm = quat2rm(quat);
+            printData(data);
+            delete quat;
+        }
         return data;
     }
 
@@ -150,14 +156,18 @@ namespace drone {
     }
 }
 
-void* processDataFromDrone(void* dataProcessor){
-    // Process data from drone, store it in sharedData
+void* runServer(void* dataProcessor){
+    // Initialize server
     drone::DataProcessor* dp = (drone::DataProcessor*) dataProcessor;
-    if(dp->getParams()->serverOff){
+    int status = 0;
+    status = serverInit(dp->server, dp->getParams()->serverHost, dp->getParams()->serverPort, dp->getParams()->serverType);
+    if (status != 0) {
+        cout << "error initializing server" << endl;
         pthread_detach(pthread_self());
         pthread_exit(NULL);
     }
-    int status = 0;
+
+    // Process data from drone, store it in sharedData
     SharedData* sharedData = dp->getSharedData();
     dp->server->listen();
     while(1){
@@ -180,8 +190,20 @@ void* processDataFromDrone(void* dataProcessor){
     pthread_exit(NULL);
 }
 
-void* spin(void* obj){
+void* runClient(void* dataProcessor){
+    // Initialize client
+    drone::DataProcessor* dp = (drone::DataProcessor*) dataProcessor;
+    int status = 0;
+    status = clientInit(dp->client, dp->getParams()->clientHost, dp->getParams()->clientPort, dp->getParams()->clientType);
+    if(status != 0) {
+        cout << "error initializing client" << endl;
+        pthread_detach(pthread_self());
+        pthread_exit(NULL);
+    }
+
+    // Call callback functions
     ros::spin();
+    
     pthread_detach(pthread_self());
     pthread_exit(NULL);
 }

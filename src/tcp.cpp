@@ -1,19 +1,18 @@
-// Constants defined in network.h and tcp.h
-#include "network/tcp.h"
+/**
+ * This file (tcp.cpp) implements interfaces for a server and a client
+ * that uses TCP, declared in tcp.h
+ *
+ * Interface is based off of the skeleton declared in network.h
+ *
+ * Author: David Sanders <david.sanders@mail.utoronto.ca>
+ */
 
-#include <sys/time.h>
+#include "network/tcp.h"
 #include <arpa/inet.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
-#include <string>
 #include <netdb.h>
-#include <iostream>
 #include <sstream>
 #include <errno.h>
+#include <stdio.h>
 
 using namespace std;
 
@@ -30,10 +29,8 @@ Server_TCP::~Server_TCP(){
 }
 
 int Server_TCP::init(const char* host, const int port){
-    // close connection if alread connected
+    // Close connection if alread connected
     closeConn();
-
-    // Declare variables
 
     // Create a socket
     listeningSock = socket(AF_INET, SOCK_STREAM, 0); // PF_INET instead?
@@ -49,18 +46,19 @@ int Server_TCP::init(const char* host, const int port){
         perror("Socket configuration fail");
         return 1;
     }
+
     // Bind it to the listening port.
     memset(&serverAddr, 0, sizeof serverAddr);
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(port);
-    inet_pton(AF_INET, host, &(serverAddr.sin_addr)); // bind to local IP address
-    // serverAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    inet_pton(AF_INET, host, &(serverAddr.sin_addr));
     status = ::bind(listeningSock, (struct sockaddr*) &serverAddr, sizeof serverAddr);
     if (status != 0) {
         // error binding socket
         perror("bind() fail");
         return 1;
     }
+
     // Listen for connections
     status = 0;
     status = ::listen(listeningSock, MAX_LISTENQUEUELEN);
@@ -90,7 +88,6 @@ int Server_TCP::send(const char* msg, const size_t length){
     return 0;
 }
 
-// receives a message
 int Server_TCP::receive(){
     // For storing msg size
     char* msgSizeBuf = new char[(sizeof(char)*sizeof(int))];
@@ -110,7 +107,7 @@ int Server_TCP::receive(){
     readFromStream(msgSizeBuf, msgSize);
     
     // Done reading message size; Read one byte from scoket
-    while (msgSize > 1){
+    while (msgSize > 0){
         bytes = recv(clientSock, _buf, msgSize, 0);
         if (bytes <= 0) {
             // recv() was not successful; so stop
@@ -138,7 +135,7 @@ Client_TCP::~Client_TCP(){
 }
 
 int Client_TCP::init(const char* host, const int port){
-    // close connection if alread connected
+    // Close connection if alread connected
     closeConn();
 
     // Declare vriables
@@ -178,10 +175,10 @@ int Client_TCP::init(const char* host, const int port){
             sleep(CONNECTION_WAIT_TIME);
         }
     } while ( status != 0);
+    
     return 0;
 }
 
-// Sends a message terminated by '\n'
 int Client_TCP::send(const char* msg, const size_t length){
     // Create a message; number of bytes in stream indicated at the head of buffer
     char* totalMsg = new char[(sizeof(char)*(length+sizeof(int)))]; // buffer
@@ -196,17 +193,16 @@ int Client_TCP::send(const char* msg, const size_t length){
         if (bytes <= 0) {
             // send() was not successful
             perror("sending unsuccessful");
-            free(totalMsg);
+            delete [] totalMsg;
             return 1;
         }
         tosend -= (size_t) bytes;
         msg += bytes;
     }
-    free(totalMsg);
+    delete [] totalMsg;
     return 0;
 }
 
-// Recieves a message terminated by '\n'
 int Client_TCP::receive(){
     return 0;
 }

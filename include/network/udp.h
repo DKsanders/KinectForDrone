@@ -1,11 +1,16 @@
-// Constants also defined in communication.h
+/**
+ * This file (udp.h) provides interfaces for a server and a client
+ * that uses UDP, implemented in udp.cpp
+ *
+ * Interface is based off of the skeleton declared in network.h
+ *
+ * Author: David Sanders <david.sanders@mail.utoronto.ca>
+ */
 
 #ifndef _UDP_H
 #define _UDP_H
 
 // Libraries
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include "network/network.h"
 
 using namespace std;

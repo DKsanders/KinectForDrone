@@ -1,11 +1,16 @@
-// Constants also defined in communication.h
+/**
+ * This file (tcp.h) provides interfaces for a server and a client
+ * that uses TCP, implemented in tcp.cpp
+ *
+ * Interface is based off of the skeleton declared in network.h
+ *
+ * Author: David Sanders <david.sanders@mail.utoronto.ca>
+ */
 
 #ifndef _TCP_H
 #define _TCP_H
 
 // Libraries
-#include <sys/socket.h>
-#include <netinet/in.h>
 #include "network/network.h"
 
 // Constants
@@ -13,6 +18,7 @@
 
 using namespace std;
 
+// Server
 typedef class Server_TCP : public Server
 {
 public:
@@ -22,11 +28,12 @@ public:
 
     virtual int init(const char* host, const int port);
     virtual int listen();
-    virtual int send(const char* msg, const size_t length);
+    virtual int send(const char* msg, const size_t length); // NOT IMPLEMENTED
     virtual int receive();
 
 } Server_TCP;
 
+// Client
 typedef class Client_TCP : public Client
 {
 public:
@@ -36,7 +43,7 @@ public:
     
     virtual int init(const char* host, const int port);
     virtual int send(const char* msg, const size_t length);
-    virtual int receive();
+    virtual int receive(); // NOT IMPLEMENTED
     
 } Client_TCP;
 

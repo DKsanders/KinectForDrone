@@ -8,9 +8,6 @@
 #include "drone/ARMarkers.h"
 #include "drone/ARMarker.h"
 
-#define DELIM '#'
-#define PRECISION 7 // d.p. of data
-
 typedef struct Marker{
   int type;
 

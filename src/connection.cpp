@@ -1,16 +1,23 @@
+/**
+ * This file (connection.cpp) implements helper functions for
+ * initializing servers and clients, declared in connection.h
+ * 
+ * The servers and clients must be inherited from those
+ * declared in network.h
+ *
+ * Author: David Sanders <david.sanders@mail.utoronto.ca>
+ */
+
 #include "network/connection.h"
 #include <sstream>
 #include <fstream>
 using namespace std;
 
-// Server initialization
 int serverInit(Server*& server){
-	cout << "Initializing Server" << endl;
-	// Identify connection type
+	// Initialize
+	int status;
 	string host;
 	int port;
-	int type;
-	int validType = 0;
 
 	// Read host number
 	cout << "Enter host number: ";
@@ -20,36 +27,16 @@ int serverInit(Server*& server){
 	cout << "Enter port number: ";
 	cin >> port;
 
-	// Read connection type
-	while(!validType){
-		cout << "Connection Types:" << endl;
-		cout << " [1] TCP" << endl;
-		cout << " [2] UDP" << endl;
-		cout << "Enter the corresponding Number: ";
-		cin >> type;
-		if(type == TCP){
-			cout << "Server is running on " << host << " at port "
-				 << port << " using TCP connection" << endl;
-			server = new Server_TCP();
-			validType = 1;
-		} else if(type == UDP){
-			cout << "Server is running on " << host << " at port "
-				 << port << " using UDP connection" << endl;
-			server = new Server_UDP();
-			validType = 1;
-		} else {
-			cout << "Incorrect connection type" << endl;
-		}
-	}
-	int status = server->init(host, port);
+	status = serverInit(server, host.c_str(), port);
 	return status;
 }
 
-// Server initialization
 int serverInit(Server*& server, const char* host, const int port){
-	cout << "Initializing Server" << endl;
+	// Initialize
+	int status;
 	int type;
 	int validType = 0;
+
 	// Read connection type
 	while(!validType){
 		cout << "Connection Types:" << endl;
@@ -57,27 +44,20 @@ int serverInit(Server*& server, const char* host, const int port){
 		cout << " [2] UDP" << endl;
 		cout << "Enter the corresponding Number: ";
 		cin >> type;
-		if(type == TCP){
-			cout << "Server is running on " << host << " at port "
-				 << port << " using TCP connection" << endl;
-			server = new Server_TCP();
-			validType = 1;
-		} else if(type == UDP){
-			cout << "Server is running on " << host << " at port "
-				 << port << " using UDP connection" << endl;
-			server = new Server_UDP();
-			validType = 1;
-		} else {
+		if (type != TCP && type != UDP) {
 			cout << "Incorrect connection type" << endl;
 		}
 	}
-	int status = server->init(host, port);
+	status = serverInit(server, host, port, type);
 	return status;
 }
 
-// Server initialization
+int serverInit(Server*& server, const char* host, const int port, const string& type){
+	return serverInit(server, host, port, str2type(type));
+}
+
 int serverInit(Server*& server, const char* host, const int port, const int type){
-	cout << "Initializing Server" << endl;
+	// Initialize to appropriate network type
 	if(type == TCP){
 		cout << "Server is running on " << host << " at port "
 			 << port << " using TCP connection" << endl;
@@ -93,14 +73,11 @@ int serverInit(Server*& server, const char* host, const int port, const int type
 	return status;
 }
 
-// Client initialization
 int clientInit(Client*& client){
-	cout << "Initializing Client" << endl;
-	// Identify connection type
+	// Initialize
+	int status;
 	string host;
 	int port;
-	int type;
-	int validType = 0;
 
 	// Read host number
 	cout << "Enter host number: ";
@@ -110,36 +87,16 @@ int clientInit(Client*& client){
 	cout << "Enter port number: ";
 	cin >> port;
 
-	// Read and check connection type
-	while(!validType){
-		cout << "Connection Types:" << endl;
-		cout << " [1] TCP" << endl;
-		cout << " [2] UDP" << endl;
-		cout << "Enter the corresponding Number: ";
-		cin >> type;
-		if(type == TCP){
-			cout << "Client is running on " << host << " at port "
-				 << port << " using TCP connection" << endl;
-			client = new Client_TCP();
-			validType = 1;
-		} else if(type == UDP){
-			cout << "Client is running on " << host << " at port "
-				 << port << " using UDP connection" << endl;
-			client = new Client_UDP();
-			validType = 1;
-		} else {
-			cout << "Incorrect connection type" << endl;
-		}
-	}
-	int status = client->init(host, port);
+	status = clientInit(client, host.c_str(), port);
 	return status;
 }
 
-// Client initialization
 int clientInit(Client*& client, const char* host, const int port){
-	cout << "Initializing Client" << endl;
+	// Initialize
+	int status;
 	int type;
 	int validType = 0;
+
 	// Read and check connection type
 	while(!validType){
 		cout << "Connection Types:" << endl;
@@ -147,27 +104,20 @@ int clientInit(Client*& client, const char* host, const int port){
 		cout << " [2] UDP" << endl;
 		cout << "Enter the corresponding Number: ";
 		cin >> type;
-		if(type == TCP){
-			cout << "Client is running on " << host << " at port "
-				 << port << " using TCP connection" << endl;
-			client = new Client_TCP();
-			validType = 1;
-		} else if(type == UDP){
-			cout << "Client is running on " << host << " at port "
-				 << port << " using UDP connection" << endl;
-			client = new Client_UDP();
-			validType = 1;
-		} else {
+		if(type != TCP && type != UDP) {
 			cout << "Incorrect connection type" << endl;
 		}
 	}
-	int status = client->init(host, port);
+	status = clientInit(client, host, port, type);
 	return status;
 }
 
-// Client initialization
+int clientInit(Client*& client, const char* host, const int port, const string& type){
+	return clientInit(client, host, port, str2type(type));
+}
+
 int clientInit(Client*& client, const char* host, const int port, const int type){
-	cout << "Initializing Client" << endl;
+	// Initialize to appropriate network type
 	if(type == TCP){
 		cout << "Client is running on " << host << " at port "
 			 << port << " using TCP connection" << endl;
@@ -183,17 +133,15 @@ int clientInit(Client*& client, const char* host, const int port, const int type
 	return status;
 }
 
-// Map string to index
-int str2type(const string& type){
-	if(type == "TCP") {
+int str2type(const string& str){
+	if(str == "TCP") {
 		return TCP;
-	} else if(type == "UDP") {
+	} else if(str == "UDP") {
 		return UDP;
 	}
 	return -1;
 }
 
-// Map index to string
 string type2str(int type){
 	if(type == TCP) { 
 		return "TCP";
@@ -203,17 +151,19 @@ string type2str(int type){
 	return "";
 }
 
-// Parses a configuration file
-// Input: path to file
 ConfigParams* readConfig(const char* config){
-	ConfigParams* params = new ConfigParams;
-	params -> serverOff = 0;
-	params -> clientOff = 0;
+	// Check that the file exists
 	ifstream file (config);
 	if(!file.is_open()) {
 		cout << "Unable to find "<< config << endl;
 		return NULL;
 	}
+
+	// Initialize ConfigParams struct
+	ConfigParams* params = new ConfigParams;
+	params -> serverOff = 0;
+	params -> clientOff = 0;
+	
 	string line;
 	while(getline(file, line)){
 		// Process line by line
@@ -223,10 +173,10 @@ ConfigParams* readConfig(const char* config){
 	return params;
 }
 
-// Parses a line from the configuration file
 void parseLine(ConfigParams* params, const string& line){
+	// Check if the line is a comment
 	if(line[0] == COMMENT_CHAR){
-		// Reading a comment; ignore
+		// Parsing a comment; ignore
 		return;
 	}
 	stringstream entireLine(line);

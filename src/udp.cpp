@@ -1,17 +1,17 @@
-// Constants defined in communication.h and udp.h
+/**
+ * This file (udp.cpp) implements interfaces for a server and a client
+ * that uses UDP, declared in udp.h
+ *
+ * Interface is based off of the skeleton declared in network.h
+ *
+ * Author: David Sanders <david.sanders@mail.utoronto.ca>
+ */
 
 #include "network/udp.h"
-#include <sys/time.h>
 #include <arpa/inet.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
-#include <fcntl.h>
-#include <netinet/in.h>
 #include <errno.h>
+#include <stdio.h>
+
 using namespace std;
 
 Server_UDP::Server_UDP(){
@@ -64,12 +64,10 @@ int Server_UDP::listen(){
     return 0;
 }
 
-// Sends a message terminated by '\n'
 int Server_UDP::send(const char* msg, const size_t length){
     return 0;
 }
 
-// receives a message terminated by '\n'
 int Server_UDP::receive(){
     // Clear buffer
     memset(buf, 0, sizeof buf);
@@ -102,6 +100,7 @@ Client_UDP::~Client_UDP(){
 int Client_UDP::init(const char* host, const int port){
     // close connection if alread connected
     closeConn();
+    
     sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if(sockfd < 0){
         // failed
@@ -119,7 +118,6 @@ int Client_UDP::init(const char* host, const int port){
     return 0;
 }
 
-// Sends a message terminated by '\n'
 int Client_UDP::send(const char* msg, const size_t length){
 
     socklen_t slen = sizeof(serverAddr);
@@ -128,11 +126,9 @@ int Client_UDP::send(const char* msg, const size_t length){
         perror("Sending unsuccessful");
         return 1;
     }
-    //cout << "sent: " << msg << endl;
     return 0;
 }
 
-// Recieves a message terminated by '\n'
 int Client_UDP::receive(){
     return 0;
 }

@@ -1,24 +1,81 @@
+/**
+ * This file (data_handling.cpp) implements functions for processing 
+ * and communicating drone data, declared in data_handling.h
+ *
+ * Author: David Sanders <david.sanders@mail.utoronto.ca>
+ */
+
 #include "drone/data_handling.h"
 #include "network/network.h"
 #include <iostream>
-#include <sstream>
-#include <cstdlib>
-#include <cstring>
-#include <stdint.h>
-#include <endian.h>
+#include <math.h>
 
 using namespace std;
 
-// Converts a Quaternion to a Rotatino Matrix
+RotationMatrix::RotationMatrix(){
+    ;
+}
+
+RotationMatrix::~RotationMatrix(){
+    ;
+}
+
+double RotationMatrix::getDeterminant(){
+    return matrix[0][0]* (matrix[1][1]*matrix[2][2] - matrix[2][1]*matrix[1][2])
+           - matrix[0][1]* (matrix[1][0]*matrix[2][2] - matrix[2][0]*matrix[1][2])
+           + matrix[0][2]* (matrix[1][0]*matrix[2][1] - matrix[2][0]*matrix[1][1]);
+}
+
+RotationMatrix RotationMatrix::getInverse(){
+    ;
+}
+
+RotationMatrix RotationMatrix::operator*(const RotationMatrix& rhs){
+    ;
+}
+
+HomogeneousMatrix::HomogeneousMatrix(){
+    ;
+}
+
+HomogeneousMatrix::~HomogeneousMatrix(){
+    ;
+}
+
+double HomogeneousMatrix::getDeterminant(){
+    ;
+}
+
+HomogeneousMatrix HomogeneousMatrix::getInverse(){
+    ;
+}
+
+HomogeneousMatrix HomogeneousMatrix::operator*(const HomogeneousMatrix& rhs){
+    ;
+}
+
+HomogeneousMatrix HomogeneousMatrix::operator=(const RotationMatrix& rhs){
+    ;
+}
+
+void Quaternion::print(){
+    cout << "Quaternion: " << endl;
+    cout << "w: " << w << endl;
+    cout << "x: " << x << endl;
+    cout << "y: " << y << endl;
+    cout << "z: " << z << endl;
+}
+
 RotationMatrix* quat2rm(Quaternion* quat){
     // Create Rotation Matrix
     RotationMatrix* rm = new RotationMatrix;
 
     // Convert
-    double a = quat->w;
-    double b = quat->x;
-    double c = quat->y;
-    double d = quat->z;
+    double z = sqrt(quat->w * quat->w + quat->x * quat->x + quat->y * quat->y + quat->z * quat->z);
+    double a = quat->w/z;
+    double b = quat->x/z;
+    double c = quat->y/z;
+    double d = quat->z/z;
 
     rm->matrix[0][0] = a*a + b*b - c*c - d*d;
     rm->matrix[0][1] = 2*b*c - 2*a*d;
@@ -33,7 +90,6 @@ RotationMatrix* quat2rm(Quaternion* quat){
     return rm;
 }
 
-// Converts DroneData into a string of bytes; return string must be freed
 void serialize(const DroneData* data, char*& buf, int & buf_size){
     // Initialize
     buf = new char[MAX_BUF_SIZE]; // buffer for storing data
@@ -55,11 +111,11 @@ void serialize(const DroneData* data, char*& buf, int & buf_size){
     current += write2stream(current, data->rm->matrix[2][2]);
     current += write2stream(current, data->comment.c_str());
 
-    buf_size = current-buf;
+    // Calculate buffer size
+    buf_size = (int) (current-buf);
     return;
 }
 
-// Converts a string of bytes into DroneData
 DroneData* deserialize(const char* msg){
     // Initialize
     char* current = const_cast<char*>(msg);
@@ -84,7 +140,6 @@ DroneData* deserialize(const char* msg){
     return data;
 }
 
-// Prints the type DroneData to the screen
 void printData(const DroneData* data){
     cout << "---------------------------------------------------------------------"<< endl;
     cout << "Sequence Number: " << endl;
