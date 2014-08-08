@@ -65,6 +65,13 @@ int Server_UDP::accept(){
 }
 
 int Server_UDP::send(const char* msg, const size_t length){
+    
+    socklen_t slen = sizeof(clientAddr);
+    ssize_t sent = sendto(clientSock, msg, length, 0, (const sockaddr*)&clientAddr, slen);
+    if (sent < 0){
+        perror("Sending unsuccessful");
+        return 1;
+    }
     return 0;
 }
 
@@ -130,5 +137,16 @@ int Client_UDP::send(const char* msg, const size_t length){
 }
 
 int Client_UDP::receive(){
+    // Clear buffer
+    memset(buf, 0, sizeof buf);
+    ssize_t bytes;
+    socklen_t slen = sizeof(serverAddr);
+
+    // Read actual msg
+    bytes = recvfrom(sockfd, buf, sizeof buf, 0, (sockaddr*)&serverAddr, &slen);
+    if(bytes < 0){
+        perror("Receiving unsuccessful");
+        return 1;
+    }
     return 0;
 }
