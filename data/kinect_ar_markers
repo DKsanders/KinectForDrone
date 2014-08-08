@@ -1,44 +1,50 @@
 #the number of patterns to be recognized
-3
+8
 
 #pattern 1
-BLACK
-data/my_markers/black.pat
-70.0
+ONE
+data/my_markers/m1.patt
+34.5
 0.0 0.0
 
 #pattern 2
-BLUE
-data/my_markers/blue.pat
-70.0
+TWO
+data/my_markers/m2.patt
+34.5
 0.0 0.0
 
 #pattern 3
-RED
-data/my_markers/red.pat
-70.0
+THREE
+data/my_markers/m3.patt
+34.5
 0.0 0.0
 
-#pattern 1
-#PATTERN_ONE
-#data/my_markers/one.pat
-#32.0
-#0.0 0.0
+#pattern 4
+FOUR
+data/my_markers/m4.patt
+34.5
+0.0 0.0
 
-#pattern 2
-#PATTERN_TWO
-#data/my_markers/two.pat
-#32.0
-#0.0 0.0
+#pattern 5
+FIVE
+data/my_markers/m5.patt
+34.5
+0.0 0.0
 
-#pattern 3
-#PATTERN_THREE
-#data/my_markers/three.pat
-#32.0
-#0.0 0.0
+#pattern 6
+SIX
+data/my_markers/m6.patt
+34.5
+0.0 0.0
 
-#pattern 1
-#PATTERN_FOUR
-#data/my_markers/four.pat
-#32.0
-#0.0 0.0
+#pattern 7
+SEVEN
+data/my_markers/m7.patt
+34.5
+0.0 0.0
+
+#pattern 8
+EIGHT
+data/my_markers/m8.patt
+34.5
+0.0 0.0
