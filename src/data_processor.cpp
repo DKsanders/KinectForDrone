@@ -169,7 +169,7 @@ void* runServer(void* dataProcessor){
 
     // Process data from drone, store it in sharedData
     SharedData* sharedData = dp->getSharedData();
-    dp->server->listen();
+    dp->server->accept();
     while(1){
         status = dp->server->receive();
         if (status != 0){

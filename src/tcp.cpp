@@ -70,10 +70,10 @@ int Server_TCP::init(const char* host, const int port){
     return 0;
 }
 
-int Server_TCP::listen(){
+int Server_TCP::accept(){
 
   socklen_t clientAddrLen = sizeof clientAddr;
-  clientSock = accept(listeningSock, (struct sockaddr*)&clientAddr, &clientAddrLen);
+  clientSock = ::accept(listeningSock, (struct sockaddr*)&clientAddr, &clientAddrLen);
   if (clientSock < 0) {
     // error accepting connection
     perror("accept() fail");
@@ -85,6 +85,26 @@ int Server_TCP::listen(){
 
 // Sends a message
 int Server_TCP::send(const char* msg, const size_t length){
+    // Create a message; number of bytes in stream indicated at the head of buffer
+    char* totalMsg = new char[(sizeof(char)*(length+sizeof(int)))]; // buffer
+    char* current = totalMsg;
+    current += write2stream(current, (int)length); // msg size
+    current += write2stream(current, msg, (int)length); // actual msg
+    size_t tosend = length + sizeof(int); // bytes needed to be sent
+
+    // Start sending
+    while (tosend > 0){
+        ssize_t bytes = ::send(clientSock, totalMsg, tosend, 0);
+        if (bytes <= 0) {
+            // send() was not successful
+            perror("sending unsuccessful");
+            delete [] totalMsg;
+            return 1;
+        }
+        tosend -= (size_t) bytes;
+        msg += bytes;
+    }
+    delete [] totalMsg;
     return 0;
 }
 
@@ -204,5 +224,33 @@ int Client_TCP::send(const char* msg, const size_t length){
 }
 
 int Client_TCP::receive(){
+    // For storing msg size
+    char* msgSizeBuf = new char[(sizeof(char)*sizeof(int))];
+    int msgSize;
+    
+    // Clear buffer
+    memset(buf, 0, sizeof buf);
+    char* _buf = (char*) buf;
+    ssize_t bytes;
+    
+    // Read message size
+    bytes = recv(sockfd, msgSizeBuf, sizeof(int), 0);
+    if(bytes != sizeof(int)){
+        perror("Unable to read all bytes for message size");
+        return 1;
+    }
+    readFromStream(msgSizeBuf, msgSize);
+    
+    // Done reading message size; Read one byte from scoket
+    while (msgSize > 0){
+        bytes = recv(sockfd, _buf, msgSize, 0);
+        if (bytes <= 0) {
+            // recv() was not successful; so stop
+            perror("recv() unsuccessful");
+            return 1;
+        }
+        msgSize = msgSize - bytes;
+    }
+    delete [] msgSizeBuf;
     return 0;
 }

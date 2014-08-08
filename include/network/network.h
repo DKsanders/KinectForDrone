@@ -37,8 +37,8 @@ public:
     int init(string& host, const int port) {return init(host.c_str(), port);};
     virtual int init(const char* host, const int port) = 0;
     
-    // For listening on ports
-    virtual int listen() = 0;
+    // For accepting connectinos
+    virtual int accept() = 0;
     
     // Sending
     int send(const string& msg) { return send(msg.c_str()); };

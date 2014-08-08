@@ -59,8 +59,8 @@ int Server_UDP::init(const char* host, const int port){
     return 0;
 }
 
-int Server_UDP::listen(){
-    // no listening
+int Server_UDP::accept(){
+    // no accepting
     return 0;
 }
 

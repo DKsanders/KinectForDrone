@@ -27,7 +27,7 @@ public:
 	virtual ~Server_TCP();
 
     virtual int init(const char* host, const int port);
-    virtual int listen();
+    virtual int accept();
     virtual int send(const char* msg, const size_t length); // NOT IMPLEMENTED
     virtual int receive();
 
