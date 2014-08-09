@@ -21,7 +21,7 @@
 #include <sstream>
 #include <pthread.h>
 #include "network/connection.h"
-#include "drone/data_handling.h"
+#include "data_handling.h"
 
 // Constants
 #define PUB_BUFFER_SIZE 1
@@ -32,6 +32,12 @@ using namespace std;
 // Structure for holding data needed by both server and client
 typedef struct SharedData{
   int id; // use to check if new data or not
+
+  // Flags
+  int serverReady;
+  int clientReady;
+  int done;
+
   string etc; // data
 } SharedData;
 
@@ -65,7 +71,7 @@ namespace drone
     ros::Subscriber ar_pose_markers_sub;
 
     // Functions
-    DroneData* processDataToDrone(const drone::ARMarkers::ConstPtr &msg, const int seq);
+    DroneData processDataToDrone(const drone::ARMarkers::ConstPtr &msg, const int seq);
 
     // Parameters
     string network_config;

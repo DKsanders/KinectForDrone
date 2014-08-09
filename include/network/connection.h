@@ -11,8 +11,8 @@
 #ifndef CONNECTION_H
 #define CONNECTION_H
 
-#include "network/udp.h"
-#include "network/tcp.h"
+#include "udp.h"
+#include "tcp.h"
 #include <unistd.h>
 #include <string.h>
 #include <iostream>

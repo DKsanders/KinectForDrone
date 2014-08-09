@@ -11,7 +11,7 @@
 #define _UDP_H
 
 // Libraries
-#include "network/network.h"
+#include "network.h"
 
 using namespace std;
 

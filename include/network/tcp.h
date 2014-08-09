@@ -11,7 +11,7 @@
 #define _TCP_H
 
 // Libraries
-#include "network/network.h"
+#include "network.h"
 
 // Constants
 #define MAX_LISTENQUEUELEN 1

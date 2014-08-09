@@ -12,49 +12,11 @@
 
 using namespace std;
 
-// Rotation Matrix
-typedef class RotationMatrix{
-public:
-  RotationMatrix();
-  ~RotationMatrix();
-
-  double matrix[3][3];
-
-  double getDeterminant();
-  RotationMatrix getInverse();
-  RotationMatrix operator*(const RotationMatrix& rhs);
-private:
-
-} RotationMatrix;
-
-// Homogeneous Matrix
-typedef class HomogeneousMatrix{
-public:
-  HomogeneousMatrix();
-  ~HomogeneousMatrix();
-  
-  double matrix[4][4];
-
-  double getDeterminant();
-  HomogeneousMatrix getInverse();
-  HomogeneousMatrix operator*(const HomogeneousMatrix& rhs);
-  HomogeneousMatrix operator=(const RotationMatrix& rhs);
-
-private:
-
-} HomogeneousMatrix;
-
-// Quaternion
-typedef struct Quaternion{
-  double w, x, y, z;
-  void print();
-} Quaternion;
-
 // Data passed to drone
 typedef struct DroneData{
 public:
-  DroneData(){rm = new RotationMatrix;}
-  ~DroneData(){delete rm;}
+  DroneData();
+  ~DroneData();
 
   // Sequence Number
   int seq;
@@ -65,21 +27,15 @@ public:
   double dist_z;
 
   // Rotation Matrix
-  RotationMatrix* rm;
+  double rm[3][3];
 
   // Extra Data
   string comment;
 
-} DroneData;
+  // Functions
+  void print();
 
-/**
- * Converts a Quaternion to a Rotatino Matrix
- * Arguments:
- *  quat(INPUT) - a pointer to a quaternion structure to be converted
- * Return:
- *  a pointer to a rotation matrix struct, created using new
- */
-RotationMatrix* quat2rm(Quaternion* quat); 
+} DroneData;
 
 /**
  * Converts DroneData into a byte stream
@@ -98,12 +54,5 @@ void serialize(const DroneData* data, char*& buf, int & buf_size);
  *  a pointer to a DroneData structure, created using new
  */
 DroneData* deserialize(const char* msg);
-
-/**
- * Prints the type DroneData to the screen
- * Arguments:
- *  data(INPUT) - a pointer to the data you want printed
- */
-void printData(const DroneData* data);
 
 #endif //END_IF_DATA_HANDLING_H
