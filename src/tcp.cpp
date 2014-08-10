@@ -36,6 +36,7 @@ int Server_TCP::init(const char* host, const int port){
     listeningSock = socket(AF_INET, SOCK_STREAM, 0); // PF_INET instead?
     if(listeningSock < 0){
         perror("Socket creation unsuccessful");
+        return 1;
     }
   
     // Allow listening port to be reused if defunct.

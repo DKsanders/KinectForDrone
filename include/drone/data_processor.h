@@ -56,14 +56,16 @@ namespace drone
     // 
     int getCurrentID();
     SharedData* getSharedData();
-    ConfigParams* getParams();
+    ConfigParams* getClientParams();
+    ConfigParams* getServerParams();
 
   private:
     // Variables
     ros::NodeHandle n;
     int seq; // sequence number for data sent
     int currentSharedDataID;
-    ConfigParams* params;
+    ConfigParams* clientParams;
+    ConfigParams* serverParams;
     SharedData* sharedData;
 
     // Subscribing to topics
@@ -74,7 +76,8 @@ namespace drone
     DroneData processDataToDrone(const drone::ARMarkers::ConstPtr &msg, const int seq);
 
     // Parameters
-    string network_config;
+    string client_config;
+    string server_config;
 
   };
 

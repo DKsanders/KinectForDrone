@@ -62,30 +62,31 @@ namespace drone {
         XmlRpc::XmlRpcValue param_center;
 
         string path;
-        if (!n_param.getParam ("network_configuration", path)){
-            network_config = package_path + "/config/network.config";
+        // Client parameters
+        if (!n_param.getParam ("client_configuration", path)){
+            client_config = package_path + "/config/client.config";
         }else{
-            network_config = path;
+            client_config = path;
+        }
+        // Server parameters
+        if (!n_param.getParam ("server_configuration", path)){
+            server_config = package_path + "/config/server.config";
+        }else{
+            server_config = path;
         }
 
         // Subscribe to topics
         ar_pose_markers_sub = n.subscribe("ar_pose_markers", SUB_BUFFER_SIZE, &DataProcessor::arPoseMarkersCallback, this);
 
         // Read config file for network
-        params = readConfig(network_config.c_str());
-        if(params == NULL){
-            cout << "error reading config file" << endl;
+        serverParams = readConfig(server_config.c_str());
+        clientParams = readConfig(client_config.c_str());
+        if(serverParams == NULL || clientParams == NULL){
+            //Error reading config file
         }
 
         // Initialize client
-        if(!params->clientOff){
-            pthread_create(&clientThreadID, NULL, runClient, this);
-        } else {
-            pthread_mutex_lock(&printLock);
-            cout << "Client OFF" << endl;
-            pthread_mutex_unlock(&printLock);
-            sharedData->clientReady = 1;
-        }
+        pthread_create(&clientThreadID, NULL, runClient, this);
 
         // Wait until client has been initialized
         int clientReady = 0;
@@ -97,21 +98,15 @@ namespace drone {
         }
 
         // Initialize server
-        if(!params->serverOff){
-            pthread_create(&serverThreadID, NULL, runServer, this);
-        } else {
-            pthread_mutex_lock(&printLock);
-            cout << "Server OFF" << endl;
-            pthread_mutex_unlock(&printLock);
-            sharedData->serverReady = 1;
-        }
+        pthread_create(&serverThreadID, NULL, runServer, this);
     }
 
     DataProcessor::~DataProcessor(){
         delete sharedData;
-        delete server;
-        delete client;
-        delete params;
+        if(server != NULL) delete server;
+        if(client != NULL) delete client;
+        if(clientParams != NULL) delete clientParams;
+        if(serverParams != NULL) delete serverParams;
     }
 
     void DataProcessor::arPoseMarkersCallback(const drone::ARMarkers::ConstPtr &msg)
@@ -216,8 +211,12 @@ namespace drone {
         return sharedData;
     }
 
-    ConfigParams* DataProcessor::getParams(){
-        return params;
+    ConfigParams* DataProcessor::getClientParams(){
+        return clientParams;
+    }
+
+    ConfigParams* DataProcessor::getServerParams(){
+        return serverParams;
     }
 }
 
@@ -225,7 +224,7 @@ void* runServer(void* dataProcessor){
     // Initialize server
     drone::DataProcessor* dp = (drone::DataProcessor*) dataProcessor;
     int status = 0;
-    status = serverInit(dp->server, dp->getParams()->serverHost, dp->getParams()->serverPort, dp->getParams()->serverType);
+    status = serverInit(dp->server, dp->getServerParams());
     if (status != 0) {
         cout << "error initializing server" << endl;
         pthread_detach(pthread_self());
@@ -237,6 +236,12 @@ void* runServer(void* dataProcessor){
     pthread_mutex_lock(&sharedDataLock);
     sharedData->serverReady = 1;
     pthread_mutex_unlock(&sharedDataLock);
+
+    if (dp->server == NULL){
+        // Server off
+        pthread_detach(pthread_self());
+        pthread_exit(NULL);
+    }
 
     // Accept loop
     while(1){
@@ -271,7 +276,7 @@ void* runClient(void* dataProcessor){
     // Initialize client
     drone::DataProcessor* dp = (drone::DataProcessor*) dataProcessor;
     int status = 0;
-    status = clientInit(dp->client, dp->getParams()->clientHost, dp->getParams()->clientPort, dp->getParams()->clientType);
+    status = clientInit(dp->client, dp->getClientParams());
     if(status != 0) {
         cout << "error initializing client" << endl;
         pthread_detach(pthread_self());
@@ -284,6 +289,12 @@ void* runClient(void* dataProcessor){
     sharedData->clientReady = 1;
     pthread_mutex_unlock(&sharedDataLock);
 
+    if (dp->client == NULL){
+        // Client off
+        pthread_detach(pthread_self());
+        pthread_exit(NULL);
+    }
+    
     // Call callback functions
     ros::spin();
     

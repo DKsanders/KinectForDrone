@@ -27,37 +27,41 @@ using namespace std;
 
 // Structure for holding the configuration parameters
 typedef struct ConfigParams{
-	// Server configuration
-	int serverOff;
-	char* serverHost;
-	int serverPort;
-	int serverType;
-
-	// Client configuration
-	char* clientHost;
-	int clientPort;
-	int clientType;
-	int clientOff;
+	ConfigParams();
+	~ConfigParams();
+	// Configuration variables
+	int state; // 0 is off, 1 is on
+	char* host; // "XXX.XXX.XXX.XXX" format
+	int port;
+	int type;
 
 } ConfigParams;
+
+int getHost(const string& line, string& host);
+int getPort(const string& line, int& port);
+int getType(const string& line, int& type);
 
 /**
  * Initializes server/client
  * Arguments:
- *  server/client(OUTPUT) - server/client to be initialized
+ *  server/client(OUTPUT) - server/client to be initialized; NULL if uninitialized
  *  host(INPUT) - host adress of the form "XXX.XXX.XXX.XXX"
  *  port(INPUT) - port to open connection
  *  type(INPUT) - index representing network type (e.g.TCP=1)
  * Return:
- *  0 if successful
+ *  0 if successful, 1 if error occurred
  */
 int serverInit(Server*& server);
-int serverInit(Server*& server, const char* host, const int port);
+int serverInit(Server*& server, ConfigParams* params);
+int serverInit(Server*& server, const string& host, const int port, const string& type);
+int serverInit(Server*& server, const string& host, const int port, const int type);
 int serverInit(Server*& server, const char* host, const int port, const string& type);
 int serverInit(Server*& server, const char* host, const int port, const int type);
 
 int clientInit(Client*& client);
-int clientInit(Client*& client, const char* host, const int port);
+int clientInit(Client*& client, ConfigParams* params);
+int clientInit(Client*& client, const string& host, const int port, const string& type);
+int clientInit(Client*& client, const string& host, const int port, const int type);
 int clientInit(Client*& client, const char* host, const int port, const string& type);
 int clientInit(Client*& client, const char* host, const int port, const int type);
 
@@ -93,7 +97,8 @@ ConfigParams* readConfig(const char* config);
  * Arguments:
  *  config(OUTPUT) - updated data from parsing the line
  *  line(INPUT) - a single line from the configuration file
+ *  lineNum(INPUT) - line number of config file being processed
  */
-void parseLine(ConfigParams* params, const string& line);
+int parseLine(ConfigParams* params, const string& line, int lineNum);
 
 #endif //END_IF_CONNECTION_H

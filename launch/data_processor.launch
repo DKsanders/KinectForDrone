@@ -1,5 +1,6 @@
 <launch>
 	<node name="data_processor" pkg="drone" type="data_processor" respawn="false" output="screen">
-		<param name="network_configuration" type="string" value="$(find drone)/config/network.config"/>
+		<param name="client_configuration" type="string" value="$(find drone)/config/client.config"/>
+		<param name="server_configuration" type="string" value="$(find drone)/config/server.config"/>
 	</node>
 </launch>
