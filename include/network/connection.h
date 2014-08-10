@@ -48,9 +48,9 @@ typedef struct ConfigParams{
  * Return:
  *  0 if successful, 1 if line is contaminated
  */
-int getHost(const string& line, string& host);
-int getPort(const string& line, int& port);
-int getType(const string& line, int& type);
+int extractHost(const string& line, string& host);
+int extractPort(const string& line, int& port);
+int extractType(const string& line, int& type);
 
 /**
  * Initializes server/client

@@ -27,7 +27,7 @@ ConfigParams::~ConfigParams() {
 	}
 }
 
-int getHost(const string& line, string& host) {
+int extractHost(const string& line, string& host) {
 	// Check if localhost
 	if(line == "localhost" || line == "LOCAL_HOST" || line == "LOCALHOST"){
 		host = "127.0.0.1";
@@ -73,7 +73,7 @@ int getHost(const string& line, string& host) {
 	return 0;
 }
 
-int getPort(const string& line, int& port) {
+int extractPort(const string& line, int& port) {
 	// Check the port number
 	stringstream ss(line);
 	int temp;
@@ -92,7 +92,7 @@ int getPort(const string& line, int& port) {
 	return 0;
 }
 
-int getType(const string& line, int& type) {
+int extractType(const string& line, int& type) {
 	// Check that the line is valid
 	if(line == "TCP" || line == "tcp" || line == "1"){
 		type = 1;
@@ -134,7 +134,7 @@ int serverInit(Server*& server, ConfigParams* params){
 		} else {
 			cout << "Enter host number: ";
 			getline(cin, str);
-			status = getHost(str, host);
+			status = extractHost(str, host);
 		}
 		if(status != 0){
 			// Invalid host
@@ -150,7 +150,7 @@ int serverInit(Server*& server, ConfigParams* params){
 		} else {
 			cout << "Enter port number: ";
 			getline(cin, str);
-			status = getPort(str, port);
+			status = extractPort(str, port);
 		}
 		if(status != 0 ){
 			// Invalid port
@@ -169,7 +169,7 @@ int serverInit(Server*& server, ConfigParams* params){
 			cout << " [2] UDP" << endl;
 			cout << "Enter the corresponding Number: ";
 			getline(cin, str);
-			status = getType(str, type);
+			status = extractType(str, type);
 		}
 		if (status != 0) {
 			cout << "Invalid connection type" << endl;
@@ -239,7 +239,7 @@ int clientInit(Client*& client, ConfigParams* params){
 		} else {
 			cout << "Enter host number: ";
 			getline(cin, str);
-			status = getHost(str, host);
+			status = extractHost(str, host);
 		}
 		if(status != 0){
 			// Invalid host
@@ -255,7 +255,7 @@ int clientInit(Client*& client, ConfigParams* params){
 		} else {
 			cout << "Enter port number: ";
 			getline(cin, str);
-			status = getPort(str, port);
+			status = extractPort(str, port);
 		}
 		if(status != 0 ){
 			// Invalid port
@@ -274,7 +274,7 @@ int clientInit(Client*& client, ConfigParams* params){
 			cout << " [2] UDP" << endl;
 			cout << "Enter the corresponding Number: ";
 			getline(cin, str);
-			status = getType(str, type);
+			status = extractType(str, type);
 		}
 		if (status != 0) {
 			cout << "Invalid connection type" << endl;
@@ -390,20 +390,20 @@ int parseLine(ConfigParams* params, const string& line, int lineNum){
 
 	if(name == "HOST") {
 		string host;
-		status = getHost(value, host);
+		status = extractHost(value, host);
 		if(status == 0){
 			params -> host = new char[host.length()+1];
 			strcpy(params -> host, host.c_str());
 		}
 	} else if (name == "PORT") {
 		int port;
-		status = getPort(value, port);
+		status = extractPort(value, port);
 		if(status == 0){
 			params -> port = port;
 		}
 	} else if (name == "NETWORK") {
 		int type;
-		status = getType(value, type);
+		status = extractType(value, type);
 		if(status == 0){
 			params -> type = type;
 		}
