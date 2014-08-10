@@ -316,9 +316,9 @@ int clientInit(Client*& client, const char* host, const int port, const int type
 }
 
 int str2type(const string& str){
-	if(str == "TCP") {
+	if(str == "TCP" || str == "tcp" ) {
 		return TCP;
-	} else if(str == "UDP") {
+	} else if(str == "UDP" || str == "dup" ) {
 		return UDP;
 	}
 	return -1;
