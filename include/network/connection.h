@@ -37,6 +37,17 @@ typedef struct ConfigParams{
 
 } ConfigParams;
 
+/**
+ * Obtains the desired data from a string
+ * Arguments:
+ *  line(INPUT) - line containing user input
+ *
+ *  host(OUTPUT) - host data extracted from line
+ *  port(OUTPUT) - port data extracted from line
+ *  type(OUTPUT) - network type extracted from line
+ * Return:
+ *  0 if successful, 1 if line is contaminated
+ */
 int getHost(const string& line, string& host);
 int getPort(const string& line, int& port);
 int getType(const string& line, int& type);
@@ -45,6 +56,9 @@ int getType(const string& line, int& type);
  * Initializes server/client
  * Arguments:
  *  server/client(OUTPUT) - server/client to be initialized; NULL if uninitialized
+ *
+ *  params(INPUT) - ConfigParams structure containing network configuration
+ *
  *  host(INPUT) - host adress of the form "XXX.XXX.XXX.XXX"
  *  port(INPUT) - port to open connection
  *  type(INPUT) - index representing network type (e.g.TCP=1)

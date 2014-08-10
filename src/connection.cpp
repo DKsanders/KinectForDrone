@@ -14,6 +14,7 @@
 using namespace std;
 
 ConfigParams::ConfigParams() {
+	// Initialize
 	state = 0;
 	host = NULL;
 	port = 0;
@@ -27,7 +28,12 @@ ConfigParams::~ConfigParams() {
 }
 
 int getHost(const string& line, string& host) {
-	// Variables
+	// Check if localhost
+	if(line == "localhost" || line == "LOCAL_HOST" || line == "LOCALHOST"){
+		host = "127.0.0.1";
+		return 0;
+	}
+	// Initialize
 	stringstream ss(line);
 	int num;
 	char period;
@@ -44,8 +50,10 @@ int getHost(const string& line, string& host) {
 			return 1;
 		}
 	}
-	// Make sure is still the last number to read
+
+	// Make sure there is still the last number to read
 	if(ss.eof()) {
+		// Error - ran out of data
 		return 1;
 	}
 
@@ -59,6 +67,8 @@ int getHost(const string& line, string& host) {
 	if(!ss.eof()) {
 		return 1;
 	}
+
+	// Valid host
 	host = line;
 	return 0;
 }
@@ -71,28 +81,24 @@ int getPort(const string& line, int& port) {
 	if(temp < 1 || temp > 65535){
 		return 1;
 	}
-	// Error if it wasn't the last one
+
+	// Error if stream not empty
 	if(!ss.eof()) {
 		return 1;
 	}
+
+	// Valid port number
 	port = temp;
 	return 0;
 }
 
 int getType(const string& line, int& type) {
-	// Check the network type index
-	stringstream ss(line);
-	string temp;
-	ss >> temp;
-	// Error if it wasn't the last one
-	if(!ss.eof()) {
-		return 1;
-	}
-	if(temp == "TCP" || temp == "1"){
+	// Check that the line is valid
+	if(line == "TCP" || line == "tcp" || line == "1"){
 		type = 1;
 		return 0;
 	}
-	if(temp == "UDP" || temp == "2"){
+	if(line == "UDP" || line == "udp" || line == "2"){
 		type = 2;
 		return 0;
 	}
@@ -133,7 +139,7 @@ int serverInit(Server*& server, ConfigParams* params){
 		if(status != 0){
 			// Invalid host
 			cout << "Invalid host, must follow the format \"XXX.XXX.XXX.XXX\"" << endl;
-			params->host = NULL;
+			//params->host = NULL;
 		}
 	} while(status);
 
@@ -149,7 +155,7 @@ int serverInit(Server*& server, ConfigParams* params){
 		if(status != 0 ){
 			// Invalid port
 			cout << "Invalid port, must be between 1 and 65535" << endl;
-			params->port = 0;
+			//params->port = 0;
 		}
 	} while(status);
 
@@ -167,7 +173,7 @@ int serverInit(Server*& server, ConfigParams* params){
 		}
 		if (status != 0) {
 			cout << "Invalid connection type" << endl;
-			params->type = 0;
+			//params->type = 0;
 		}
 	} while(status);
 
@@ -402,9 +408,9 @@ int parseLine(ConfigParams* params, const string& line, int lineNum){
 			params -> type = type;
 		}
 	} else if (name == "STATE") {
-		if(value == "ON" || value == "1"){
+		if(value == "ON" || value == "on" || value == "On" || value == "1"){
 			params -> state = 1;
-		} else if (value == "OFF" || value == "0"){
+		} else if (value == "OFF" || value == "off" || value == "Off" || value == "0"){
 			params -> state = 0;
 		} else {
 			status = 1;
