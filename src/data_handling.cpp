@@ -12,7 +12,7 @@
 using namespace std;
 
 DroneData::DroneData(){
-    ;
+    comment = "";
 }
 
 DroneData::~DroneData(){

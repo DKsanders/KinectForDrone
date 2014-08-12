@@ -34,7 +34,7 @@
 using namespace std;
 
 // Structure for holding the configuration parameters
-typedef struct ConfigParams{
+struct ConfigParams{
 	ConfigParams();
 	~ConfigParams();
 	// Configuration variables
@@ -43,7 +43,7 @@ typedef struct ConfigParams{
 	int port;
 	int type;
 
-} ConfigParams;
+};
 
 /**
  * Obtains the desired data from a string
@@ -64,28 +64,12 @@ int extractType(const string& line, int& type);
  * Initializes server/client
  * Arguments:
  *  server/client(OUTPUT) - server/client to be initialized; NULL if uninitialized
- *
  *  params(INPUT) - ConfigParams structure containing network configuration
- *
- *  host(INPUT) - host adress of the form "XXX.XXX.XXX.XXX"
- *  port(INPUT) - port to open connection
- *  type(INPUT) - index representing network type (e.g.TCP=1)
  * Return:
  *  0 if successful, 1 if error occurred
  */
-int serverInit(Server*& server);
 int serverInit(Server*& server, ConfigParams* params);
-int serverInit(Server*& server, const string& host, const int port, const string& type);
-int serverInit(Server*& server, const string& host, const int port, const int type);
-int serverInit(Server*& server, const char* host, const int port, const string& type);
-int serverInit(Server*& server, const char* host, const int port, const int type);
-
-int clientInit(Client*& client);
 int clientInit(Client*& client, ConfigParams* params);
-int clientInit(Client*& client, const string& host, const int port, const string& type);
-int clientInit(Client*& client, const string& host, const int port, const int type);
-int clientInit(Client*& client, const char* host, const int port, const string& type);
-int clientInit(Client*& client, const char* host, const int port, const int type);
 
 /**
  * Maps a string containing the network type to its index

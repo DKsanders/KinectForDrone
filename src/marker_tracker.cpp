@@ -53,8 +53,8 @@ namespace drone {
         pthread_mutex_init(&sharedDataLock, NULL);
         pthread_mutex_init(&printLock, NULL);
         sharedData = new SharedData;
-        seq = 0;
-        currentSharedDataID = 0;
+        seqToDrone = 0;
+        seqFromDrone = 0;
         pthread_t clientThreadID, serverThreadID;
         
         // Get parameters
@@ -93,7 +93,10 @@ namespace drone {
         markers = markerParser.getMarkers();
         if(serverParams == NULL || clientParams == NULL || status != 0){
             //Error reading config file
-            cout << "Error reading config file" << endl;
+            ROS_FATAL("Error reading config file(s)");
+            pthread_mutex_lock(&sharedDataLock);
+            sharedData -> done = 1;
+            pthread_mutex_unlock(&sharedDataLock);
         }
 
         // Initialize client
@@ -118,14 +121,50 @@ namespace drone {
         if(client != NULL) delete client;
         if(clientParams != NULL) delete clientParams;
         if(serverParams != NULL) delete serverParams;
+        if(markers != NULL) delete markers;
+    }
+
+    int DataProcessor::getSeqFromDrone(){
+        return seqFromDrone;
+    }
+
+    Client* DataProcessor::getClient(){
+        return client;
+    }
+
+    Server* DataProcessor::getServer(){
+        return server;
+    }
+
+    ConfigParams* DataProcessor::getClientParams(){
+        return clientParams;
+    }
+
+    ConfigParams* DataProcessor::getServerParams(){
+        return serverParams;
+    }
+
+    SharedData* DataProcessor::getSharedData(){
+        return sharedData;
+    }
+
+    MarkerDataSet* DataProcessor::getMarkerDataSet(){
+        return markers;
+    }
+
+    void DataProcessor::setClient(Client* _client){
+        client = _client;
+    }
+    void DataProcessor::setServer(Server* _server){
+        server = _server;
     }
 
     void DataProcessor::arPoseMarkersCallback(const drone::ARMarkers::ConstPtr &msg)
     {
         // Handle updated data from drone
         pthread_mutex_lock(&sharedDataLock);
-        if (currentSharedDataID != sharedData -> id){
-            currentSharedDataID = sharedData -> id; // update id
+        if (seqFromDrone != sharedData -> id){
+            seqFromDrone = sharedData -> id; // update id
             // process new data from drone
             cout << sharedData -> id << endl;
         }
@@ -137,7 +176,13 @@ namespace drone {
             return;
         } else {
             // Process data
-            DroneData data = processDataToDrone(msg, seq);
+            int status = 0;
+            DroneData data;
+            status = processDataToDrone(msg, seqToDrone, data);
+            if(status != 0){
+                // Error processing data
+                return;
+            }
             char* buf = new char[MAX_BUF_SIZE]; // buffer for storing data
             int buf_size;
             serialize(&data, buf, buf_size);
@@ -147,16 +192,15 @@ namespace drone {
                 ROS_INFO("failed to send to drone");
             }
             delete [] buf;
-            seq += 1;    
+            seqToDrone += 1;    
         }
     }
 
-    DroneData DataProcessor::processDataToDrone(const drone::ARMarkers::ConstPtr &msg, const int seq){
+    int DataProcessor::processDataToDrone(const drone::ARMarkers::ConstPtr &msg, const int seq, DroneData& data){
         // Interpret marker data
-        DroneData data;
         int markerNum = msg -> markers.size();
-        HomogeneousMatrix final;
-        final.matrix[3][3] = 0;
+        HomogeneousMatrix avg; // average of marker data
+        avg.matrix[3][3] = 0;
         HomogeneousMatrix h02offset; // Auxilary matrix, h02 when roll/pitch/yaw = 0
         h02offset.matrix[0][2] = 1;
         h02offset.matrix[1][0] = 1;
@@ -183,61 +227,36 @@ namespace drone {
             // Get marker data and transform it to a homogeneous matrix
             MarkerData* markerData = markers->getMarker(msg -> markers[i].id); // marker -> drone
             HomogeneousMatrix h21 = *markerData;
-            /*
-            h21.matrix[0][0] = 0;
-            h21.matrix[0][1] = 1;
-            h21.matrix[0][2] = 0;
-            h21.matrix[0][3] = -0.04;
-            h21.matrix[1][0] = 0;
-            h21.matrix[1][1] = 0;
-            h21.matrix[1][2] = -1;
-            h21.matrix[1][3] = 0;
-            h21.matrix[2][0] = -1;
-            h21.matrix[2][1] = 0;
-            h21.matrix[2][2] = 0;
-            h21.matrix[2][3] = -0.23;
-            */
-            //double h21[4][4] = { { 0, 0, -1, -4 }, { 0, -1, 0, 0}, { -1, 0, 0, -23 }, { 0, 0, 0, 1 }};
-            //HomogeneousMatrix h21 = (*markerData);
             HomogeneousMatrix h20 = h10*h21; // kinect -> drone
-            final = final + h20;
+            avg = avg + h20;
         }
-        final = final/markerNum; // get average of markers
-        HomogeneousMatrix rpy = h02offset*final;
-        if(final.matrix[2][0] == 1 || final.matrix[2][0] == -1 ){
+        // Take average of markers
+        avg = avg/markerNum;
+
+        // Calculate RPY
+        HomogeneousMatrix rpy = h02offset*avg;
+        if(avg.matrix[2][0] == 1 || avg.matrix[2][0] == -1 ){
             // Singularity in the homogeneous matrix - unable to calculate roll/pitch/yaw
-            //return NULL;
+            return 1;
         } else {
             rpy.hm2rpy();
         }
         data = rpy.toData();
         data.seq = seq;
         data.print();
-        return data;
-    }
-
-    int DataProcessor::getCurrentID(){
-        return currentSharedDataID;
-    }
-
-    SharedData* DataProcessor::getSharedData(){
-        return sharedData;
-    }
-
-    ConfigParams* DataProcessor::getClientParams(){
-        return clientParams;
-    }
-
-    ConfigParams* DataProcessor::getServerParams(){
-        return serverParams;
+        return 0;
     }
 }
 
 void* runServer(void* dataProcessor){
-    // Initialize server
+    // Initialize
     drone::DataProcessor* dp = (drone::DataProcessor*) dataProcessor;
+    Server* server = dp->getServer();
+    ConfigParams* params = dp->getServerParams();
+    SharedData* sharedData = dp->getSharedData();
     int status = 0;
-    status = serverInit(dp->server, dp->getServerParams());
+
+    status = serverInit(server, params);
     if (status != 0) {
         cout << "error initializing server" << endl;
         pthread_detach(pthread_self());
@@ -245,34 +264,34 @@ void* runServer(void* dataProcessor){
     }
 
     // Raise flag for initialized server
-    SharedData* sharedData = dp->getSharedData();
     pthread_mutex_lock(&sharedDataLock);
     sharedData->serverReady = 1;
     pthread_mutex_unlock(&sharedDataLock);
 
-    if (dp->server == NULL){
+    if (server == NULL){
         // Server off
         pthread_detach(pthread_self());
         pthread_exit(NULL);
     }
+    dp->setServer(server);
 
     // Accept loop
     while(1){
-        status = dp->server->accept();
+        status = server->accept();
         if(status != 0){
             pthread_detach(pthread_self());
             pthread_exit(NULL);
         }
         // Process data from drone, store it in sharedData
         while(1){
-            status = dp->server->receive();
+            status = server->receive();
             if (status != 0){
                 // Error receiving
                 cout << "recv() failed, exiting processDataFromDrone()" << endl;
                 break;
             }
             // Handle dp -> server-> buf
-            cout << dp -> server->buf << endl;
+            cout << server->buf << endl;
 
             pthread_mutex_lock(&sharedDataLock);
             // Modify sharedData
@@ -286,11 +305,18 @@ void* runServer(void* dataProcessor){
 }
 
 void* runClient(void* dataProcessor){
-    // Initialize client
+    // Initialize
     drone::DataProcessor* dp = (drone::DataProcessor*) dataProcessor;
+    Client* client = dp->getClient();
+    cout << client << endl;
+    ConfigParams* params = dp->getClientParams();
+    SharedData* sharedData = dp -> getSharedData();
     int status = 0;
+
+
     pthread_mutex_lock(&printLock);
-    status = clientInit(dp->client, dp->getClientParams());
+    status = clientInit(client, params);
+    cout << client << endl;
     pthread_mutex_unlock(&printLock);
     if(status != 0) {
         cout << "error initializing client" << endl;
@@ -299,18 +325,20 @@ void* runClient(void* dataProcessor){
     }
 
     // Raise flag for initialized client
-    SharedData* sharedData = dp -> getSharedData();
     pthread_mutex_lock(&sharedDataLock);
     sharedData->clientReady = 1;
     pthread_mutex_unlock(&sharedDataLock);
 
-    if (dp->client == NULL){
+    if (client == NULL){
         // Client off
         pthread_detach(pthread_self());
         pthread_exit(NULL);
     }
     
     // Call callback functions
+    dp->setClient(client);
+    Client* client2 = dp->getClient();
+    cout << client2 << endl;
     ros::spin();
     
     pthread_detach(pthread_self());

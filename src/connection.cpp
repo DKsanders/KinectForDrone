@@ -29,7 +29,7 @@ ConfigParams::~ConfigParams() {
 
 int extractHost(const string& line, string& host) {
 	// Check if localhost
-	if(line == "localhost" || line == "LOCAL_HOST" || line == "LOCALHOST"){
+	if(line == "local_host" || line == "localhost" || line == "LOCAL_HOST" || line == "LOCALHOST"){
 		host = "127.0.0.1";
 		return 0;
 	}
@@ -105,17 +105,17 @@ int extractType(const string& line, int& type) {
 	return 1;
 }
 
+/*
 int serverInit(Server*& server){
 	ConfigParams dummy;
 	dummy.state = 1; // turn on server
 	return serverInit(server, &dummy);
 }
+*/
 
 int serverInit(Server*& server, ConfigParams* params){
 	// Initialize
 	int status = 0;
-	string str; // for storing whole line of user input
-	stringstream ss;
 	string host;
 	int port;
 	int type;
@@ -127,74 +127,12 @@ int serverInit(Server*& server, ConfigParams* params){
 		return 0;
 	}
 
-	// Obtain host number
-	do {
-		if (params->host != NULL){ 
-			host = params->host;
-		} else {
-			cout << "Enter host number: ";
-			getline(cin, str);
-			status = extractHost(str, host);
-		}
-		if(status != 0){
-			// Invalid host
-			cout << "Invalid host, must follow the format \"XXX.XXX.XXX.XXX\"" << endl;
-			//params->host = NULL;
-		}
-	} while(status);
+	// Obtain
+	host = params->host;
+	port = params->port;
+	type = params->type;
 
-	// Read port number
-	do {
-		if (params->port != 0){ 
-			port = params->port;
-		} else {
-			cout << "Enter port number: ";
-			getline(cin, str);
-			status = extractPort(str, port);
-		}
-		if(status != 0 ){
-			// Invalid port
-			cout << "Invalid port, must be between 1 and 65535" << endl;
-			//params->port = 0;
-		}
-	} while(status);
-
-	// Obtain network type
-	do {
-		if (params->type != 0){ 
-			type = params->type;
-		} else {
-			cout << "Connection Types:" << endl;
-			cout << " [1] TCP" << endl;
-			cout << " [2] UDP" << endl;
-			cout << "Enter the corresponding Number: ";
-			getline(cin, str);
-			status = extractType(str, type);
-		}
-		if (status != 0) {
-			cout << "Invalid connection type" << endl;
-			//params->type = 0;
-		}
-	} while(status);
-
-	status = serverInit(server, host, port, type);
-	return status;
-}
-
-int serverInit(Server*& server, const string& host, const int port, const string& type){
-	return serverInit(server, host.c_str(), port, str2type(type));
-}
-
-int serverInit(Server*& server, const string& host, const int port, const int type){
-	return serverInit(server, host.c_str(), port, type);
-}
-
-int serverInit(Server*& server, const char* host, const int port, const string& type){
-	return serverInit(server, host, port, str2type(type));
-}
-
-int serverInit(Server*& server, const char* host, const int port, const int type){
-	// Initialize to appropriate network type
+	// Initialize server
 	if(type == TCP){
 		cout << "Server is running on " << host << " at port "
 			 << port << " using TCP connection" << endl;
@@ -203,24 +141,14 @@ int serverInit(Server*& server, const char* host, const int port, const int type
 		cout << "Server is running on " << host << " at port "
 			 << port << " using UDP connection" << endl;
 		server = new Server_UDP();
-	} else {
-		cout << "Incorrect connection type" << endl;
 	}
-	int status = server->init(host, port);
+	status = server->init(host, port);
 	return status;
-}
-
-int clientInit(Client*& client){
-	ConfigParams dummy;
-	dummy.state = 1; // turn on client
-	return clientInit(client, &dummy);
 }
 
 int clientInit(Client*& client, ConfigParams* params){
 	// Initialize
 	int status = 0;
-	string str; // for storing whole line of user input
-	stringstream ss;
 	string host;
 	int port;
 	int type;
@@ -232,74 +160,12 @@ int clientInit(Client*& client, ConfigParams* params){
 		return 0;
 	}
 
-	// Obtain host number
-	do {
-		if (params->host != NULL){ 
-			host = params->host;
-		} else {
-			cout << "Enter host number: ";
-			getline(cin, str);
-			status = extractHost(str, host);
-		}
-		if(status != 0){
-			// Invalid host
-			cout << "Invalid host, must follow the format \"XXX.XXX.XXX.XXX\"" << endl;
-			params->host = NULL;
-		}
-	} while(status);
+	// Obtain
+	host = params->host;
+	port = params->port;
+	type = params->type;
 
-	// Read port number
-	do {
-		if (params->port != 0){ 
-			port = params->port;
-		} else {
-			cout << "Enter port number: ";
-			getline(cin, str);
-			status = extractPort(str, port);
-		}
-		if(status != 0 ){
-			// Invalid port
-			cout << "Invalid port, must be between 1 and 65535" << endl;
-			params->port = 0;
-		}
-	} while(status);
-
-	// Obtain network type
-	do {
-		if (params->type != 0){ 
-			type = params->type;
-		} else {
-			cout << "Connection Types:" << endl;
-			cout << " [1] TCP" << endl;
-			cout << " [2] UDP" << endl;
-			cout << "Enter the corresponding Number: ";
-			getline(cin, str);
-			status = extractType(str, type);
-		}
-		if (status != 0) {
-			cout << "Invalid connection type" << endl;
-			params->type = 0;
-		}
-	} while(status);
-
-	status = clientInit(client, host, port, type);
-	return status;
-}
-
-int clientInit(Client*& client, const string& host, const int port, const string& type){
-	return clientInit(client, host.c_str(), port, str2type(type));
-}
-
-int clientInit(Client*& client, const string& host, const int port, const int type){
-	return clientInit(client, host.c_str(), port, type);
-}
-
-int clientInit(Client*& client, const char* host, const int port, const string& type){
-	return clientInit(client, host, port, str2type(type));
-}
-
-int clientInit(Client*& client, const char* host, const int port, const int type){
-	// Initialize to appropriate network type
+	// Initialize client
 	if(type == TCP){
 		cout << "Client is running on " << host << " at port "
 			 << port << " using TCP connection" << endl;
@@ -308,10 +174,8 @@ int clientInit(Client*& client, const char* host, const int port, const int type
 		cout << "Client is running on " << host << " at port "
 			 << port << " using UDP connection" << endl;
 		client = new Client_UDP();
-	} else {
-		cout << "Incorrect connection type" << endl;
 	}
-	int status = client->init(host, port);
+	status = client->init(host, port);
 	return status;
 }
 

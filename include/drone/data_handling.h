@@ -13,7 +13,7 @@
 using namespace std;
 
 // Data passed to drone
-typedef struct DroneData{
+struct DroneData{
 public:
   DroneData();
   ~DroneData();
@@ -36,7 +36,7 @@ public:
   // Functions
   void print();
 
-} DroneData;
+};
 
 /**
  * Converts DroneData into a byte stream

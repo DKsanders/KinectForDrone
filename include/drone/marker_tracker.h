@@ -31,7 +31,7 @@
 using namespace std;
 
 // Structure for holding data needed by both server and client
-typedef struct SharedData{
+struct SharedData{
   SharedData();
 
   int id; // use to check if new data or not
@@ -42,7 +42,7 @@ typedef struct SharedData{
   int done;
 
   string etc; // data
-} SharedData;
+};
 
 namespace drone
 {
@@ -51,33 +51,47 @@ namespace drone
   public:
     DataProcessor (ros::NodeHandle & _n);
     ~DataProcessor ();
-
-    // Communication interface
-    Client* client; // to drone
-    Server* server; // from drone
     
-    // 
-    int getCurrentID();
-    SharedData* getSharedData();
+    // Accessors
+    int getSeqFromDrone();
+    Client* getClient();
+    Server* getServer();
     ConfigParams* getClientParams();
     ConfigParams* getServerParams();
+    SharedData* getSharedData();
+    MarkerDataSet* getMarkerDataSet();
+
+    // Mutators
+    void setClient(Client* _client);
+    void setServer(Server* _server);
 
   private:
     // Variables
     ros::NodeHandle n;
-    int seq; // sequence number for data sent
-    int currentSharedDataID;
+    int seqToDrone; // sequence number for data sent
+    int seqFromDrone; // sequence number for data recieved
+    Client* client; // to drone
+    Server* server; // from drone
     ConfigParams* clientParams;
     ConfigParams* serverParams;
     MarkerDataSet* markers;
     SharedData* sharedData;
 
-    // Subscribing to topics
+    // Subscribe to topics
     void arPoseMarkersCallback(const drone::ARMarkers::ConstPtr &msg);
     ros::Subscriber ar_pose_markers_sub;
 
     // Functions
-    DroneData processDataToDrone(const drone::ARMarkers::ConstPtr &msg, const int seq);
+    /**
+     * Processes the raw data of markers into DroneData
+     * Arguments:
+     *  msg(INPUT) - DroneData that needs to be serialized
+     *  seq(INPUT) - buffer for holding byte stream
+     *  DroneData(OUTPUT) - number of bytes in byte stream
+     * Return:
+     *  0 if successful
+     */
+    int processDataToDrone(const drone::ARMarkers::ConstPtr &msg, const int seq, DroneData& data);
 
     // Parameters
     string client_config;

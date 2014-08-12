@@ -19,7 +19,7 @@
 using namespace std;
 
 // Server
-typedef class Server_TCP : public Server
+class Server_TCP : public Server
 {
 public:
 	Server_TCP();
@@ -28,13 +28,13 @@ public:
 
     virtual int init(const char* host, const int port);
     virtual int accept();
-    virtual int send(const char* msg, const size_t length); // NOT IMPLEMENTED
+    virtual int send(const char* msg, const size_t length);
     virtual int receive();
 
-} Server_TCP;
+};
 
 // Client
-typedef class Client_TCP : public Client
+class Client_TCP : public Client
 {
 public:
 	Client_TCP();
@@ -43,8 +43,8 @@ public:
     
     virtual int init(const char* host, const int port);
     virtual int send(const char* msg, const size_t length);
-    virtual int receive(); // NOT IMPLEMENTED
+    virtual int receive();
     
-} Client_TCP;
+};
 
 #endif // END_IF_TCP_H

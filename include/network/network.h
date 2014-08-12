@@ -22,7 +22,7 @@
 using namespace std;
 
 // Base of server
-typedef class Server{
+class Server{
 public:
 	Server() {
 		listeningSock = 0;
@@ -72,10 +72,10 @@ protected:
     struct sockaddr_in clientAddr;
     struct sockaddr_in serverAddr;
     
-} Server;
+};
 
 // Base of Client
-typedef class Client{
+class Client{
 public:
 	Client() {
 		sockfd = 0;
@@ -114,7 +114,7 @@ protected:
     // Variables
 	int sockfd; // socket connection
     
-} Client;
+};
 
 /**
  * Writes data to a byte stream in LITTLE ENDIAN

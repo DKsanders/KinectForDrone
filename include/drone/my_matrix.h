@@ -16,13 +16,13 @@
 using namespace std;
 
 // Quaternion
-typedef struct Quaternion{
+struct Quaternion{
   double w, x, y, z;
   void print();
-} Quaternion;
+};
 
 // Rotation Matrix
-typedef class RotationMatrix{
+class RotationMatrix{
 public:
   RotationMatrix();
   RotationMatrix(const Quaternion& quat);
@@ -49,10 +49,10 @@ public:
   RotationMatrix& operator=(const MarkerData& rhs);
 private:
 
-} RotationMatrix;
+};
 
 // Homogeneous Matrix
-typedef class HomogeneousMatrix{
+class HomogeneousMatrix{
 public:
   HomogeneousMatrix();
   HomogeneousMatrix(const Quaternion& quat);
@@ -88,7 +88,7 @@ public:
 
 private:
 
-} HomogeneousMatrix;
+};
 
 /**
  * Converts a Quaternion to a Rotatino Matrix

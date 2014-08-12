@@ -15,7 +15,7 @@
 
 using namespace std;
 
-typedef class Server_UDP : public Server
+class Server_UDP : public Server
 {
 public:
     Server_UDP();
@@ -30,9 +30,9 @@ public:
 protected:
     struct sockaddr_in listenAddr;
 
-} Server_UDP;
+};
 
-typedef class Client_UDP : public Client
+class Client_UDP : public Client
 {
 public:
     Client_UDP();
@@ -46,6 +46,6 @@ public:
 protected:
     struct sockaddr_in serverAddr;
     
-} Client_UDP;
+};
 
 #endif // END_IF_UDP_H
