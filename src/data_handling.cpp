@@ -20,6 +20,7 @@ DroneData::~DroneData(){
 }
 
 void DroneData::print(){
+    
     cout << "---------------------------------------------------------------------"<< endl;
     cout << "Sequence Number: " << endl;
     cout << "  " << seq << endl;
@@ -27,12 +28,19 @@ void DroneData::print(){
     cout << "  x "  << dist_x << endl;
     cout << "  y "  << dist_y << endl;
     cout << "  z "  << dist_z << endl;
+    /*
     cout << "Rotation Matrix: "  << endl;
     cout << "  " << rm[0][0]  << "  " << rm[0][1]  << "  " << rm[0][2] << endl;
     cout << "  " << rm[1][0]  << "  " << rm[1][1]  << "  " << rm[1][2] << endl;
     cout << "  " << rm[2][0]  << "  " << rm[2][1]  << "  " << rm[2][2] << endl;
+    */
+    cout << "Roll: "  << roll*180/3.1415926535897932 << endl;
+    cout << "Pitch: "  << pitch*180/3.1415926535897932 << endl;
+    cout << "yaw: "  << yaw*180/3.1415926535897932 << endl;
+
     cout << "Comment: " << endl;
     cout << "  " << comment << endl;
+    
     return;
 }
 
@@ -45,6 +53,7 @@ void serialize(const DroneData* data, char*& buf, int & buf_size){
     current += write2stream(current, data->dist_x);
     current += write2stream(current, data->dist_y);
     current += write2stream(current, data->dist_z);
+    /*
     current += write2stream(current, data->rm[0][0]);
     current += write2stream(current, data->rm[0][1]);
     current += write2stream(current, data->rm[0][2]);
@@ -54,6 +63,12 @@ void serialize(const DroneData* data, char*& buf, int & buf_size){
     current += write2stream(current, data->rm[2][0]);
     current += write2stream(current, data->rm[2][1]);
     current += write2stream(current, data->rm[2][2]);
+    */
+
+    current += write2stream(current, data->roll);
+    current += write2stream(current, data->pitch);
+    current += write2stream(current, data->yaw);
+
     current += write2stream(current, data->comment.c_str());
 
     // Calculate buffer size
@@ -71,6 +86,7 @@ DroneData* deserialize(const char* msg){
     current += readFromStream(current, data->dist_x);
     current += readFromStream(current, data->dist_y);
     current += readFromStream(current, data->dist_z);
+    /*
     current += readFromStream(current, data->rm[0][0]);
     current += readFromStream(current, data->rm[0][1]);
     current += readFromStream(current, data->rm[0][2]);
@@ -80,6 +96,12 @@ DroneData* deserialize(const char* msg){
     current += readFromStream(current, data->rm[2][0]);
     current += readFromStream(current, data->rm[2][1]);
     current += readFromStream(current, data->rm[2][2]);
+    */
+
+    current += readFromStream(current, data->roll);
+    current += readFromStream(current, data->pitch);
+    current += readFromStream(current, data->yaw);
+
     current += readFromStream(current, data->comment);
 
     return data;

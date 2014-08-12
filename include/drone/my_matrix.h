@@ -11,6 +11,7 @@
 #define MY_MATRIX_H
 
 #include "data_handling.h"
+#include "markers.h"
 
 using namespace std;
 
@@ -25,6 +26,7 @@ typedef class RotationMatrix{
 public:
   RotationMatrix();
   RotationMatrix(const Quaternion& quat);
+  RotationMatrix(const MarkerData& rhs);
   ~RotationMatrix();
 
   double matrix[3][3];
@@ -43,7 +45,8 @@ public:
   RotationMatrix operator-(const double rhs);
   RotationMatrix operator*(const double rhs);
   RotationMatrix operator/(const double rhs);
-  RotationMatrix& operator=(const Quaternion& rhs);
+  RotationMatrix& operator=(const Quaternion& quat);
+  RotationMatrix& operator=(const MarkerData& rhs);
 private:
 
 } RotationMatrix;
@@ -54,9 +57,13 @@ public:
   HomogeneousMatrix();
   HomogeneousMatrix(const Quaternion& quat);
   HomogeneousMatrix(const RotationMatrix& rhs);
+  HomogeneousMatrix(const MarkerData& rhs);
   ~HomogeneousMatrix();
   
   double matrix[4][4];
+  double roll;
+  double pitch;
+  double yaw;
 
   double getDeterminant();
   void transpose();
@@ -65,6 +72,8 @@ public:
   HomogeneousMatrix getInverse();
   void print();
   DroneData toData();
+  void hm2rpy();
+
 
   HomogeneousMatrix operator+(const HomogeneousMatrix& rhs);
   HomogeneousMatrix operator-(const HomogeneousMatrix& rhs);
@@ -75,6 +84,7 @@ public:
   HomogeneousMatrix operator/(const double rhs);
   HomogeneousMatrix& operator=(const RotationMatrix& rhs);
   HomogeneousMatrix& operator=(const Quaternion& quat);
+  HomogeneousMatrix& operator=(const MarkerData& rh);
 
 private:
 

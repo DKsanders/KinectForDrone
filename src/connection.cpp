@@ -341,7 +341,7 @@ ConfigParams* readConfig(const char* config){
 		return NULL;
 	}
 
-	cout << "Processing "<< config << endl;
+	cout << "PROCESSING* "<< config << endl;
 	
 	// Initialize ConfigParams struct
 	ConfigParams* params = new ConfigParams;

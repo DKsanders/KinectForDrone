@@ -27,7 +27,8 @@ public:
   double dist_z;
 
   // Rotation Matrix
-  double rm[3][3];
+  //double rm[3][3];
+  double roll, pitch, yaw;
 
   // Extra Data
   string comment;

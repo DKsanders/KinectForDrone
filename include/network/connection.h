@@ -6,6 +6,14 @@
  * declared in network.h
  *
  * Author: David Sanders <david.sanders@mail.utoronto.ca>
+ *
+ /****** CONFIG FILE EXAMPLE ******/
+ /* # Server Configuration
+ *  # COMMENT
+ *  STATE ON
+ *  HOST 127.0.0.1
+ *  PORT 1111
+ *  NETWORK TCP
  */
 
 #ifndef CONNECTION_H
@@ -112,6 +120,8 @@ ConfigParams* readConfig(const char* config);
  *  config(OUTPUT) - updated data from parsing the line
  *  line(INPUT) - a single line from the configuration file
  *  lineNum(INPUT) - line number of config file being processed
+ * Return:
+ *  0 if successful
  */
 int parseLine(ConfigParams* params, const string& line, int lineNum);
 

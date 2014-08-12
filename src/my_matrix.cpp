@@ -23,7 +23,15 @@ void Quaternion::print(){
 }
 
 RotationMatrix::RotationMatrix(){
-    ;
+    matrix[0][0] = 0;
+    matrix[0][1] = 0;
+    matrix[0][2] = 0;
+    matrix[1][0] = 0;
+    matrix[1][1] = 0;
+    matrix[1][2] = 0;
+    matrix[2][0] = 0;
+    matrix[2][1] = 0;
+    matrix[2][2] = 0;
 }
 
 RotationMatrix::RotationMatrix(const Quaternion& quat){
@@ -43,6 +51,12 @@ RotationMatrix::RotationMatrix(const Quaternion& quat){
     matrix[2][0] = 2*b*d - 2*a*c;
     matrix[2][1] = 2*c*d + 2*a*b;
     matrix[2][2] = a*a - b*b - c*c + d*d;
+}
+
+RotationMatrix::RotationMatrix(const MarkerData& rhs){
+    RotationMatrix temp;
+    temp = rhs;
+    *this = temp;
 }
 
 RotationMatrix::~RotationMatrix(){
@@ -201,7 +215,29 @@ RotationMatrix& RotationMatrix::operator=(const Quaternion& quat){
     return *this;
 }
 
+RotationMatrix& RotationMatrix::operator=(const MarkerData& rhs){
+    this->matrix[0][0] = rhs.rm[0][0];
+    this->matrix[0][1] = rhs.rm[0][1];
+    this->matrix[0][2] = rhs.rm[0][2];
+    this->matrix[1][0] = rhs.rm[1][0];
+    this->matrix[1][1] = rhs.rm[1][1];
+    this->matrix[1][2] = rhs.rm[1][2];
+    this->matrix[2][0] = rhs.rm[2][0];
+    this->matrix[2][1] = rhs.rm[2][1];
+    this->matrix[2][2] = rhs.rm[2][2];
+    return *this;
+}
+
 HomogeneousMatrix::HomogeneousMatrix(){
+    matrix[0][0] = 0;
+    matrix[0][1] = 0;
+    matrix[0][2] = 0;
+    matrix[1][0] = 0;
+    matrix[1][1] = 0;
+    matrix[1][2] = 0;
+    matrix[2][0] = 0;
+    matrix[2][1] = 0;
+    matrix[2][2] = 0;
     matrix[3][0] = 0;
     matrix[3][1] = 0;
     matrix[3][2] = 0;
@@ -215,6 +251,12 @@ HomogeneousMatrix::HomogeneousMatrix(const Quaternion& quat){
 }
 
 HomogeneousMatrix::HomogeneousMatrix(const RotationMatrix& rhs){
+    HomogeneousMatrix temp;
+    temp = rhs;
+    *this = temp;
+}
+
+HomogeneousMatrix::HomogeneousMatrix(const MarkerData& rhs){
     HomogeneousMatrix temp;
     temp = rhs;
     *this = temp;
@@ -271,6 +313,9 @@ void HomogeneousMatrix::print(){
     cout << "  " << this->matrix[1][0]  << "  " << this->matrix[1][1]  << "  " << this->matrix[1][2] << "  " << this->matrix[1][3] << endl;
     cout << "  " << this->matrix[2][0]  << "  " << this->matrix[2][1]  << "  " << this->matrix[2][2] << "  " << this->matrix[2][3] << endl;
     cout << "  " << this->matrix[3][0]  << "  " << this->matrix[3][1]  << "  " << this->matrix[3][2] << "  " << this->matrix[3][3] << endl;
+    cout << "Roll: "  << roll << endl;
+    cout << "Pitch: "  << pitch << endl;
+    cout << "Yaw: "  << yaw << endl;
 }
 
 HomogeneousMatrix HomogeneousMatrix::operator+(const HomogeneousMatrix& rhs){
@@ -381,8 +426,25 @@ HomogeneousMatrix& HomogeneousMatrix::operator=(const Quaternion& quat){
     return *this;
 }
 
+HomogeneousMatrix& HomogeneousMatrix::operator=(const MarkerData& rhs){
+    this->matrix[0][0] = rhs.rm[0][0];
+    this->matrix[0][1] = rhs.rm[0][1];
+    this->matrix[0][2] = rhs.rm[0][2];
+    this->matrix[1][0] = rhs.rm[1][0];
+    this->matrix[1][1] = rhs.rm[1][1];
+    this->matrix[1][2] = rhs.rm[1][2];
+    this->matrix[2][0] = rhs.rm[2][0];
+    this->matrix[2][1] = rhs.rm[2][1];
+    this->matrix[2][2] = rhs.rm[2][2];
+    this->matrix[0][3] = rhs.dist_x;
+    this->matrix[1][3] = rhs.dist_y;
+    this->matrix[2][3] = rhs.dist_z;
+    return *this;
+}
+
 DroneData HomogeneousMatrix::toData(){
     DroneData rtn;
+    /*
     rtn.rm[0][0] = this->matrix[0][0];
     rtn.rm[0][1] = this->matrix[0][1];
     rtn.rm[0][2] = this->matrix[0][2];
@@ -392,10 +454,22 @@ DroneData HomogeneousMatrix::toData(){
     rtn.rm[2][0] = this->matrix[2][0];
     rtn.rm[2][1] = this->matrix[2][1];
     rtn.rm[2][2] = this->matrix[2][2];
+    */
+    rtn.roll = this->roll;
+    rtn.pitch = this->pitch;
+    rtn.yaw = this->yaw;
+
     rtn.dist_x = this->matrix[0][3];
     rtn.dist_y = this->matrix[1][3];
     rtn.dist_z = this->matrix[2][3];
     return rtn;
+}
+
+
+void HomogeneousMatrix::hm2rpy(){
+    roll = atan2(matrix[2][1], matrix[2][2]);//*180/3.1415926535897;
+    pitch = atan2(-1*matrix[2][0], sqrt(matrix[1][0]*matrix[1][0]+matrix[0][0]*matrix[0][0]));//*180/3.1415926535897;
+    yaw = atan2(matrix[1][0], matrix[0][0]);//*180/3.1415926535897;
 }
 
 /*

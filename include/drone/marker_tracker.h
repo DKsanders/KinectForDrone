@@ -1,6 +1,6 @@
 /**
- * This file (data_processor.h) provides the main functionality of
- * the tracking system.
+ * This file (marker_tracker.h) provides the main functionality of
+ * the marker tracking system.
  *
  * It tracks markers on the drone using the Microsoft Kinect (c),
  * proccesses the data to estimate the attitude of the drone,
@@ -9,8 +9,8 @@
  * Author: David Sanders <david.sanders@mail.utoronto.ca>
  */
 
-#ifndef DATA_PROCESSOR_H
-#define DATA_PROCESSOR_H
+#ifndef MARKER_TRACKER_H
+#define MARKER_TRACKER_H
 
 // ROS libs
 #include "ros/ros.h"
@@ -22,6 +22,7 @@
 #include <pthread.h>
 #include "network/connection.h"
 #include "data_handling.h"
+#include "markers.h"
 
 // Constants
 #define PUB_BUFFER_SIZE 1
@@ -31,6 +32,8 @@ using namespace std;
 
 // Structure for holding data needed by both server and client
 typedef struct SharedData{
+  SharedData();
+
   int id; // use to check if new data or not
 
   // Flags
@@ -66,6 +69,7 @@ namespace drone
     int currentSharedDataID;
     ConfigParams* clientParams;
     ConfigParams* serverParams;
+    MarkerDataSet* markers;
     SharedData* sharedData;
 
     // Subscribing to topics
@@ -78,6 +82,7 @@ namespace drone
     // Parameters
     string client_config;
     string server_config;
+    string marker_data;
 
   };
 
@@ -87,4 +92,4 @@ namespace drone
 void* runServer(void* dataProcessor);
 void* runClient(void* dataProcessor);
 
-#endif //END_IF_DATA_PROCESSOR_H
+#endif //END_IF_MARKER_TRACKER_H

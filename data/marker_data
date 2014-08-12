@@ -1,0 +1,13 @@
+#the number of patterns to be recognized
+1
+
+# Pattern 1
+# Rotation Matrix
+0 1 0
+0 0 -1
+-1 0 0
+# Distandes
+-0.04
+0
+-0.23
+
