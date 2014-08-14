@@ -8,52 +8,48 @@
 #ifndef DATA_HANDLING_H
 #define DATA_HANDLING_H
 
+#include "network/network.h"
 #include <string>
 
 using namespace std;
 
 // Data passed to drone
-struct DroneData{
+class DroneData{
 public:
   DroneData();
+  DroneData(ByteStream& stream);
   ~DroneData();
 
-  // Sequence Number
-  int seq;
-  
   // Distance from Camera
   double dist_x;
   double dist_y;
   double dist_z;
 
-  // Rotation Matrix
-  //double rm[3][3];
+  //double rm[3][3]; // Rotation Matrix
   double roll, pitch, yaw;
 
   // Extra Data
   string comment;
 
-  // Functions
+
+  // Accessors
+  int getSeq();
+
+  // Mutators
+  void setSeq(int _seq);
+
+  // Converts DroneData to/from a byte stream
+  ByteStream serialize();
+  void deserialize(ByteStream& stream);
+
   void print();
+
+private:
+  // Sequence Number
+  int seq;
 
 };
 
-/**
- * Converts DroneData into a byte stream
- * Arguments:
- *  data(INPUT) - DroneData that needs to be serialized
- *  buf(OUTPUT) - buffer for holding byte stream
- *  buf_size(OUTPUT) - number of bytes in byte stream
- */
-void serialize(const DroneData* data, char*& buf, int & buf_size);
 
-/**
- * Converts a byte stream into DroneData
- * Arguments:
- *  msg(INPUT) - byte stream
- * Return:
- *  a pointer to a DroneData structure, created using new
- */
-DroneData* deserialize(const char* msg);
 
 #endif //END_IF_DATA_HANDLING_H

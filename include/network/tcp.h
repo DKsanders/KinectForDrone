@@ -28,7 +28,7 @@ public:
 
     virtual int init(const char* host, const int port);
     virtual int accept();
-    virtual int send(const char* msg, const size_t length);
+    virtual int send(ByteStream& stream);
     virtual int receive();
 
 };
@@ -42,7 +42,7 @@ public:
 	virtual ~Client_TCP();
     
     virtual int init(const char* host, const int port);
-    virtual int send(const char* msg, const size_t length);
+    virtual int send(ByteStream& stream);
     virtual int receive();
     
 };

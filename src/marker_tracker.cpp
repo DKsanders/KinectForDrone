@@ -183,15 +183,12 @@ namespace drone {
                 // Error processing data
                 return;
             }
-            char* buf = new char[MAX_BUF_SIZE]; // buffer for storing data
-            int buf_size;
-            serialize(&data, buf, buf_size);
+            ByteStream stream = data.serialize();
             // Send the message
-            if (client->send(buf, buf_size)) {
+            if (client->send(stream)) {
                 // Couldn't send
                 ROS_INFO("failed to send to drone");
             }
-            delete [] buf;
             seqToDrone += 1;    
         }
     }
@@ -242,7 +239,7 @@ namespace drone {
             rpy.hm2rpy();
         }
         data = rpy.toData();
-        data.seq = seq;
+        data.setSeq(seq);
         data.print();
         return 0;
     }
@@ -290,8 +287,7 @@ void* runServer(void* dataProcessor){
                 cout << "recv() failed, exiting processDataFromDrone()" << endl;
                 break;
             }
-            // Handle dp -> server-> buf
-            cout << server->buf << endl;
+            // Handle dp -> server-> stream
 
             pthread_mutex_lock(&sharedDataLock);
             // Modify sharedData

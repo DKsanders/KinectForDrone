@@ -64,10 +64,9 @@ int Server_UDP::accept(){
     return 0;
 }
 
-int Server_UDP::send(const char* msg, const size_t length){
-    
+int Server_UDP::send(ByteStream& stream){
     socklen_t slen = sizeof(clientAddr);
-    ssize_t sent = sendto(clientSock, msg, length, 0, (const sockaddr*)&clientAddr, slen);
+    ssize_t sent = sendto(clientSock, stream.getBuf(), stream.getBufSize(), 0, (const sockaddr*)&clientAddr, slen);
     if (sent < 0){
         perror("Sending unsuccessful");
         return 1;
@@ -77,12 +76,13 @@ int Server_UDP::send(const char* msg, const size_t length){
 
 int Server_UDP::receive(){
     // Clear buffer
-    memset(buf, 0, sizeof buf);
+    clearBuf();
     ssize_t bytes;
     socklen_t slen = sizeof(clientAddr);
 
     // Read actual msg
-    bytes = recvfrom(clientSock, buf, sizeof buf, 0, (sockaddr*)&clientAddr, &slen);
+    bytes = recvfrom(clientSock, getBuf(), getBufSize(), 0, (sockaddr*)&clientAddr, &slen);
+    stream.setWriteIndex(getBufSize());
     if(bytes < 0){
         perror("Receiving unsuccessful");
         return 1;
@@ -125,10 +125,10 @@ int Client_UDP::init(const char* host, const int port){
     return 0;
 }
 
-int Client_UDP::send(const char* msg, const size_t length){
+int Client_UDP::send(ByteStream& stream){
 
     socklen_t slen = sizeof(serverAddr);
-    ssize_t sent = sendto(sockfd, msg, length, 0, (const sockaddr*)&serverAddr, slen);
+    ssize_t sent = sendto(sockfd, stream.getBuf(), stream.getBufSize(), 0, (const sockaddr*)&serverAddr, slen);
     if (sent < 0){
         perror("Sending unsuccessful");
         return 1;
@@ -138,12 +138,13 @@ int Client_UDP::send(const char* msg, const size_t length){
 
 int Client_UDP::receive(){
     // Clear buffer
-    memset(buf, 0, sizeof buf);
+    clearBuf();
     ssize_t bytes;
     socklen_t slen = sizeof(serverAddr);
 
     // Read actual msg
-    bytes = recvfrom(sockfd, buf, sizeof buf, 0, (sockaddr*)&serverAddr, &slen);
+    bytes = recvfrom(sockfd, getBuf(), getBufSize(), 0, (sockaddr*)&serverAddr, &slen);
+    stream.setWriteIndex(getBufSize());
     if(bytes < 0){
         perror("Receiving unsuccessful");
         return 1;

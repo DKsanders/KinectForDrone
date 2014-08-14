@@ -10,6 +10,7 @@
 #include "network/tcp.h"
 #include <arpa/inet.h>
 #include <netdb.h>
+#include <iostream>
 #include <sstream>
 #include <errno.h>
 #include <stdio.h>
@@ -85,59 +86,58 @@ int Server_TCP::accept(){
 
 
 // Sends a message
-int Server_TCP::send(const char* msg, const size_t length){
-    // Create a message; number of bytes in stream indicated at the head of buffer
-    char* totalMsg = new char[(sizeof(char)*(length+sizeof(int)))]; // buffer
-    char* current = totalMsg;
-    current += write2stream(current, (int)length); // msg size
-    current += write2stream(current, msg, (int)length); // actual msg
-    size_t tosend = length + sizeof(int); // bytes needed to be sent
+int Server_TCP::send(ByteStream& stream){
+    // Add message size to head of stream
+    int status = 0;
+    ByteStream send;
+    send.write(stream.getWriteIndex()); // msg size
+    send = send + stream; // actual msg
+
+    size_t tosend = stream.getWriteIndex() + sizeof(int); // bytes needed to be sent
 
     // Start sending
+    char* head = send.getBuf();
     while (tosend > 0){
-        ssize_t bytes = ::send(clientSock, totalMsg, tosend, 0);
+        ssize_t bytes = ::send(clientSock, head, tosend, 0);
         if (bytes <= 0) {
             // send() was not successful
-            perror("sending unsuccessful");
-            delete [] totalMsg;
+            perror("Sending unsuccessful");
             return 1;
         }
         tosend -= (size_t) bytes;
-        msg += bytes;
+        head += bytes;
+        stream.setWriteIndex(stream.getWriteIndex()+bytes);
     }
-    delete [] totalMsg;
     return 0;
 }
 
 int Server_TCP::receive(){
-    // For storing msg size
-    char* msgSizeBuf = new char[(sizeof(char)*sizeof(int))];
+    // Initialze
+    ByteStream sizeStream((int)(sizeof(int))); // for storing message size
     int msgSize;
-    
-    // Clear buffer
-    memset(buf, 0, sizeof buf);
-    char* _buf = (char*) buf;
     ssize_t bytes;
     
     // Read message size
-    bytes = recv(clientSock, msgSizeBuf, sizeof(int), 0);
+    bytes = recv(clientSock, sizeStream.getBuf(), sizeof(int), 0);
     if(bytes != sizeof(int)){
         perror("Unable to read all bytes for message size");
         return 1;
     }
-    readFromStream(msgSizeBuf, msgSize);
+    sizeStream.setWriteIndex(sizeof(int));
+    sizeStream.read(msgSize);
     
     // Done reading message size; Read one byte from scoket
+    clearBuf(); // clear buffer
     while (msgSize > 0){
-        bytes = recv(clientSock, _buf, msgSize, 0);
+        bytes = recv(clientSock, getBuf(), msgSize, 0);
         if (bytes <= 0) {
             // recv() was not successful; so stop
             perror("recv() unsuccessful");
             return 1;
         }
         msgSize = msgSize - bytes;
+        stream.setWriteIndex(stream.getWriteIndex()+bytes);
     }
-    delete [] msgSizeBuf;
     return 0;
 }
 
@@ -200,58 +200,56 @@ int Client_TCP::init(const char* host, const int port){
     return 0;
 }
 
-int Client_TCP::send(const char* msg, const size_t length){
-    // Create a message; number of bytes in stream indicated at the head of buffer
-    char* totalMsg = new char[(sizeof(char)*(length+sizeof(int)))]; // buffer
-    char* current = totalMsg;
-    current += write2stream(current, (int)length); // msg size
-    current += write2stream(current, msg, (int)length); // actual msg
-    size_t tosend = length + sizeof(int); // bytes needed to be sent
+int Client_TCP::send(ByteStream& stream){
+    // Add message size to head of stream
+    int status = 0;
+    ByteStream send;
+    send.write(stream.getWriteIndex()); // msg size
+    send = send + stream; // actual msg
+
+    size_t tosend = stream.getWriteIndex() + sizeof(int); // bytes needed to be sent
 
     // Start sending
+    char* head = send.getBuf();
     while (tosend > 0){
-        ssize_t bytes = ::send(sockfd, totalMsg, tosend, 0);
+        ssize_t bytes = ::send(sockfd, head, tosend, 0);
         if (bytes <= 0) {
             // send() was not successful
-            perror("sending unsuccessful");
-            delete [] totalMsg;
+            perror("Sending unsuccessful");
             return 1;
         }
         tosend -= (size_t) bytes;
-        msg += bytes;
+        head += bytes;
     }
-    delete [] totalMsg;
     return 0;
 }
 
 int Client_TCP::receive(){
-    // For storing msg size
-    char* msgSizeBuf = new char[(sizeof(char)*sizeof(int))];
+    // Initialze
+    ByteStream sizeStream((int)(sizeof(int))); // for storing message size
     int msgSize;
-    
-    // Clear buffer
-    memset(buf, 0, sizeof buf);
-    char* _buf = (char*) buf;
     ssize_t bytes;
     
     // Read message size
-    bytes = recv(sockfd, msgSizeBuf, sizeof(int), 0);
+    bytes = recv(sockfd, sizeStream.getBuf(), sizeof(int), 0);
     if(bytes != sizeof(int)){
         perror("Unable to read all bytes for message size");
         return 1;
     }
-    readFromStream(msgSizeBuf, msgSize);
+    sizeStream.setWriteIndex(sizeof(int));
+    sizeStream.read(msgSize);
     
     // Done reading message size; Read one byte from scoket
+    clearBuf(); // clear buffer
     while (msgSize > 0){
-        bytes = recv(sockfd, _buf, msgSize, 0);
+        bytes = recv(sockfd, getBuf(), msgSize, 0);
         if (bytes <= 0) {
             // recv() was not successful; so stop
             perror("recv() unsuccessful");
             return 1;
         }
         msgSize = msgSize - bytes;
+        stream.setWriteIndex(stream.getWriteIndex()+bytes);
     }
-    delete [] msgSizeBuf;
     return 0;
 }

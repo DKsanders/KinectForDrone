@@ -15,8 +15,80 @@ DroneData::DroneData(){
     comment = "";
 }
 
-DroneData::~DroneData(){
+DroneData::DroneData(ByteStream& stream){
+    deserialize(stream);
+}
+
+DroneData::~DroneData() {
     ;
+}
+
+int DroneData::getSeq() {
+    return seq;
+}
+
+void DroneData::setSeq(int _seq) {
+    seq = _seq;
+}
+
+ByteStream DroneData::serialize() {
+    // Initialize
+    ByteStream stream; // keeps track of where to write in buffer
+
+    // Write to stream
+    stream.write(seq);
+    stream.write(dist_x);
+    stream.write(dist_y);
+    stream.write(dist_z);
+
+    /*
+    stream.write(rm[0][0]);
+    stream.write(rm[0][1]);
+    stream.write(rm[0][2]);
+    stream.write(rm[1][0]);
+    stream.write(rm[1][1]);
+    stream.write(rm[1][2]);
+    stream.write(rm[2][0]);
+    stream.write(rm[2][1]);
+    stream.write(rm[2][2]);
+    */
+
+    stream.write(roll);
+    stream.write(pitch);
+    stream.write(yaw);
+
+    stream.write(comment.c_str());
+    
+    return stream;
+}
+
+void DroneData::deserialize(ByteStream& stream) {
+    // Read from stream
+    int status = 0;
+    status += stream.read(seq);
+    status += stream.read(dist_x);
+    status += stream.read(dist_y);
+    status += stream.read(dist_z);
+    
+    /*
+    status += stream.read(rm[0][0]);
+    status += stream.read(rm[0][1]);
+    status += stream.read(rm[0][2]);
+    status += stream.read(rm[1][0]);
+    status += stream.read(rm[1][1]);
+    status += stream.read(rm[1][2]);
+    status += stream.read(rm[2][0]);
+    status += stream.read(rm[2][1]);
+    status += stream.read(rm[2][2]);
+    */
+
+    status += stream.read(roll);
+    status += stream.read(pitch);
+    status += stream.read(yaw);
+
+    status += stream.read(comment);
+
+    return;
 }
 
 void DroneData::print(){
@@ -44,65 +116,5 @@ void DroneData::print(){
     return;
 }
 
-void serialize(const DroneData* data, char*& buf, int & buf_size){
-    // Initialize
-    char* current = buf; // keeps track of where to write in buffer
-
-    // Write to stream
-    current += write2stream(current, data->seq);
-    current += write2stream(current, data->dist_x);
-    current += write2stream(current, data->dist_y);
-    current += write2stream(current, data->dist_z);
-    /*
-    current += write2stream(current, data->rm[0][0]);
-    current += write2stream(current, data->rm[0][1]);
-    current += write2stream(current, data->rm[0][2]);
-    current += write2stream(current, data->rm[1][0]);
-    current += write2stream(current, data->rm[1][1]);
-    current += write2stream(current, data->rm[1][2]);
-    current += write2stream(current, data->rm[2][0]);
-    current += write2stream(current, data->rm[2][1]);
-    current += write2stream(current, data->rm[2][2]);
-    */
-
-    current += write2stream(current, data->roll);
-    current += write2stream(current, data->pitch);
-    current += write2stream(current, data->yaw);
-
-    current += write2stream(current, data->comment.c_str());
-
-    // Calculate buffer size
-    buf_size = (int) (current-buf);
-    return;
-}
-
 DroneData* deserialize(const char* msg){
-    // Initialize
-    char* current = const_cast<char*>(msg);
-    DroneData* data = new DroneData;
-
-    // Read from stream
-    current += readFromStream(current, data->seq);
-    current += readFromStream(current, data->dist_x);
-    current += readFromStream(current, data->dist_y);
-    current += readFromStream(current, data->dist_z);
-    /*
-    current += readFromStream(current, data->rm[0][0]);
-    current += readFromStream(current, data->rm[0][1]);
-    current += readFromStream(current, data->rm[0][2]);
-    current += readFromStream(current, data->rm[1][0]);
-    current += readFromStream(current, data->rm[1][1]);
-    current += readFromStream(current, data->rm[1][2]);
-    current += readFromStream(current, data->rm[2][0]);
-    current += readFromStream(current, data->rm[2][1]);
-    current += readFromStream(current, data->rm[2][2]);
-    */
-
-    current += readFromStream(current, data->roll);
-    current += readFromStream(current, data->pitch);
-    current += readFromStream(current, data->yaw);
-
-    current += readFromStream(current, data->comment);
-
-    return data;
 }

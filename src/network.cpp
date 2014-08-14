@@ -12,13 +12,23 @@
 ByteStream::ByteStream() {
 	bufSize = DEFAULT_BUF_SIZE;
 	buf = new char[bufSize];
+    memset(buf, 0, bufSize);
 	writeIndex = 0;
 	readIndex = 0;
+}
+
+ByteStream::ByteStream(const ByteStream& rhs) {
+	writeIndex = rhs.writeIndex;
+	readIndex = rhs.readIndex;
+	bufSize = rhs.bufSize;
+	buf = new char[bufSize];
+	memcpy(buf, rhs.buf, bufSize);
 }
 
 ByteStream::ByteStream(int _bufSize) {
 	bufSize = _bufSize;
 	buf = new char[bufSize];
+    memset(buf, 0, bufSize);
 	writeIndex = 0;
 	readIndex = 0;
 }
@@ -57,6 +67,23 @@ int ByteStream::getBufSize(){
 
 char* ByteStream::getBuf(){
 	return buf;
+}
+
+void ByteStream::setWriteIndex(int _writeIndex){
+	writeIndex = _writeIndex;
+}
+
+void ByteStream::setReadIndex(int _readIndex){
+	readIndex = _readIndex;
+}
+
+void ByteStream::setBufSize(int _bufSize){
+	delete [] buf;
+	bufSize = _bufSize;
+	buf = new char[bufSize];
+    memset(buf, 0, bufSize);
+	writeIndex = 0;
+	readIndex = 0;
 }
 
 int ByteStream::write(int data) {
@@ -144,7 +171,7 @@ int ByteStream::write(const char* data, int length) {
 int ByteStream::read(int& data){
 	// Check size (should be 4 bytes)
 	int size = sizeof(int);
-	if((readIndex + size) > bufSize){
+	if((readIndex + size) > writeIndex){
 		// Not enough room in buffer
 		return 0;
 	}
@@ -163,7 +190,7 @@ int ByteStream::read(int& data){
 int ByteStream::read(float& data){
 	// Check size (should be 4 bytes)
 	int size = sizeof(float);
-	if((readIndex + size) > bufSize){
+	if((readIndex + size) > writeIndex){
 		// Not enough room in buffer
 		return 0;
 	}
@@ -182,7 +209,7 @@ int ByteStream::read(float& data){
 int ByteStream::read(double& data){
 	// Check size (should be 4 bytes)
 	int size = sizeof(double);
-	if((readIndex + size) > bufSize){
+	if((readIndex + size) > writeIndex){
 		// Not enough room in buffer
 		return 0;
 	}
@@ -218,139 +245,33 @@ int ByteStream::read(char* data, int length){
 }
 
 void ByteStream::clear(){
-	this->clear(DEFAULT_BUF_SIZE);
-}
-
-void ByteStream::clear(int _bufSize){
-	delete [] buf;
-	bufSize = _bufSize;
-	buf = new char[bufSize];
+    memset(buf, 0, bufSize);
 	writeIndex = 0;
 	readIndex = 0;
+}	
+
+ByteStream& ByteStream::operator=(const ByteStream& rhs) {
+	writeIndex = rhs.writeIndex;
+	readIndex = rhs.readIndex;
+	bufSize = rhs.bufSize;
+	buf = new char[bufSize];
+	memcpy(buf, rhs.buf, bufSize);
+	return *this;
 }
 
-int write2stream(char* buf, int data){
-	// Check size (should be 4 bytes)
-	int size = sizeof(int);
-	if(size == 4){
-		// As expected
-		uint32_t bytes = htole32(*(uint32_t*)(&data));
-		memcpy(buf, &bytes, size);
-	} else if (size == 8){
-		// int is size 8
-    	uint64_t bytes = htole64(*(uint64_t*)(&data));
-		memcpy(buf, &bytes, size);
+ByteStream ByteStream::operator+(const ByteStream& rhs) {
+	int total = this->writeIndex - this->readIndex + rhs.writeIndex - rhs.readIndex;
+	int bufSize;
+	if(total > DEFAULT_BUF_SIZE){
+		// Buffer needs to be replaced
+		bufSize = total;
 	} else {
-		// not standard size, don't write
-		return 0;
+		bufSize = DEFAULT_BUF_SIZE;
 	}
-	return size;
-}
-
-int write2stream(char* buf, float data) {
-	// Check size (should be 4 bytes)
-	int size = sizeof(float);
-	if(size == 4){
-		// As expected
-		uint32_t bytes = htole32(*(uint32_t*)(&data));
-		memcpy(buf, &bytes, size);
-	} else if (size == 8){
-		// float is size 8
-    	uint64_t bytes = htole64(*(uint64_t*)(&data));
-		memcpy(buf, &bytes, size);
-	} else {
-		// not standard size, don't write
-		return 0;
-	}
-	return size;
-}
-
-int write2stream(char* buf, double data) {
-	// Check size (should be 8 bytes)
-	int size = sizeof(double);
-	if (size == 8){
-		// As expected
-    	uint64_t bytes = htole64(*(uint64_t*)(&data));
-		memcpy(buf, &bytes, size);
-	} else if(size == 4){
-		// double has size 4...?
-		uint32_t bytes = htole32(*(uint32_t*)(&data));
-		memcpy(buf, &bytes, size);
-	} else {
-		// not standard size, don't write
-		return 0;
-	}
-	return size;
-}
-
-int write2stream(char* buf, const char* data) {
-	// Write an entire string (including "\0")
-	return write2stream(buf, data, strlen(data)+1);
-}
-
-int write2stream(char* buf, const char* data, int length) {
-	// Write specified length
-	memcpy(buf, data, length);
-	return length;
-}
-
-int readFromStream(char* buf, int& data){
-	// Check size (should be 4 bytes)
-	int size = sizeof(int);
-	if(size == 4){
-		// As expected
-		uint32_t temp = le32toh(*(uint32_t*)buf);
-		data = *((int*)(&temp));
-	} else if (size == 8){
-		// Int is 8 bytes
-		uint64_t temp = le64toh(*(uint64_t*)buf);
-		data = *((int*)(&temp));
-	} else {
-		// not standard size, don't write
-		return 0;
-	}
-	return size;
-}
-
-int readFromStream(char* buf, float& data){
-	// Check size (should be 4 bytes)
-	int size = sizeof(float);
-	if(size == 4){
-		// As expected
-		uint32_t temp = le32toh(*(uint32_t*)buf);
-		data = *((float*)(&temp));
-	} else if (size == 8){
-		// Int is 8 bytes
-		uint64_t temp = le64toh(*(uint64_t*)buf);
-		data = *((float*)(&temp));
-	} else {
-		// not standard size, don't write
-		return 0;
-	}
-	return size;
-}
-
-int readFromStream(char* buf, double& data){
-	// Check size (should be 8 bytes)
-	int size = sizeof(double);
-	if (size == 8){
-		// As expected
-		uint64_t temp = le64toh(*(uint64_t*)buf);
-		data = *((double*)(&temp));
-	} else if(size == 4){
-		// Double is 4 bytes...?
-		uint32_t temp = le32toh(*(uint32_t*)buf);
-		data = *((double*)(&temp));
-	} else {
-		// not standard size, don't write
-		return 0;
-	}
-	return size;
-}
-
-int readFromStream(char* buf, string& data){
-	// Read all chars until '\0'
-	string temp(buf);
-	data = temp;
-	return (strlen(buf)+1);
+	ByteStream rtn(bufSize);
+	rtn.writeIndex = total;
+	rtn.readIndex = 0;
+	memcpy(rtn.buf, this->buf+this->readIndex, this->writeIndex-this->readIndex);
+	memcpy(rtn.buf+this->writeIndex-this->readIndex, rhs.buf+rhs.readIndex, rhs.writeIndex-rhs.readIndex);
+	return rtn;
 }
