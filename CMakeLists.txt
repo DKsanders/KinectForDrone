@@ -106,7 +106,7 @@ include_directories(
 #   src/${PROJECT_NAME}/drone.cpp
 # )
 
-add_executable(marker_tracker src/marker_tracker.cpp src/udp.cpp src/tcp.cpp src/connection.cpp src/data_handling.cpp src/network.cpp src/my_matrix.cpp src/markers.cpp)
+add_executable(marker_tracker src/marker_tracker.cpp src/udp.cpp src/tcp.cpp src/data_handling.cpp src/network.cpp src/my_matrix.cpp src/parsers.cpp)
 target_link_libraries(marker_tracker ${catkin_LIBRARIES})
 add_dependencies(marker_tracker drone_generate_messages_cpp)
 

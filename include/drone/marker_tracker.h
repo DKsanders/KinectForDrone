@@ -20,9 +20,8 @@
 // Libraries
 #include <sstream>
 #include <pthread.h>
-#include "network/connection.h"
 #include "data_handling.h"
-#include "markers.h"
+#include "parsers.h"
 
 // Constants
 #define PUB_BUFFER_SIZE 1

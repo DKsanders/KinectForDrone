@@ -56,6 +56,8 @@ namespace drone {
         seqToDrone = 0;
         seqFromDrone = 0;
         pthread_t clientThreadID, serverThreadID;
+        NetworkConfigParser networkParser;
+        MarkerFileParser markerParser;
         
         // Get parameters
         string package_path = ros::package::getPath (ROS_PACKAGE_NAME);
@@ -86,12 +88,13 @@ namespace drone {
         ar_pose_markers_sub = n.subscribe("ar_pose_markers", SUB_BUFFER_SIZE, &DataProcessor::arPoseMarkersCallback, this);
 
         // Read config file for network
-        serverParams = readConfig(server_config.c_str());
-        clientParams = readConfig(client_config.c_str());
-        MarkerFileParser markerParser;
-        status = markerParser.readMarkers(marker_data.c_str());
+        status += networkParser.readConfig(server_config.c_str());
+        serverParams = networkParser.getConfig();
+        status += networkParser.readConfig(client_config.c_str());
+        clientParams = networkParser.getConfig();
+        status += markerParser.readMarkers(marker_data.c_str());
         markers = markerParser.getMarkers();
-        if(serverParams == NULL || clientParams == NULL || status != 0){
+        if(status != 0){
             //Error reading config file
             ROS_FATAL("Error reading config file(s)");
             pthread_mutex_lock(&sharedDataLock);
