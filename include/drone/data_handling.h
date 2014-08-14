@@ -31,7 +31,6 @@ public:
   // Extra Data
   string comment;
 
-
   // Accessors
   int getSeq();
 

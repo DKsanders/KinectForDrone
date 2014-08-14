@@ -66,7 +66,7 @@ int extractType(const string& line, int& type);
  *  server/client(OUTPUT) - server/client to be initialized; NULL if uninitialized
  *  params(INPUT) - ConfigParams structure containing network configuration
  * Return:
- *  0 if successful, 1 if error occurred
+ *  0 if successful, 1 if an error occurred
  */
 int serverInit(Server*& server, ConfigParams* params);
 int clientInit(Client*& client, ConfigParams* params);

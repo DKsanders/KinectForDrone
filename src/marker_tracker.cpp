@@ -76,8 +76,8 @@ namespace drone {
             server_config = path;
         }
         // Marker data
-        if (!n_param.getParam ("marker_data", path)){
-            marker_data = package_path + "/data/marker_data";
+        if (!n_param.getParam ("marker_configuration", path)){
+            marker_data = package_path + "/config/marker.config";
         }else{
             marker_data = path;
         }
@@ -196,6 +196,9 @@ namespace drone {
     int DataProcessor::processDataToDrone(const drone::ARMarkers::ConstPtr &msg, const int seq, DroneData& data){
         // Interpret marker data
         int markerNum = msg -> markers.size();
+        if(markerNum < 4) { 
+            return 1;
+        }
         HomogeneousMatrix avg; // average of marker data
         avg.matrix[3][3] = 0;
         HomogeneousMatrix h02offset; // Auxilary matrix, h02 when roll/pitch/yaw = 0
@@ -206,7 +209,11 @@ namespace drone {
         // Process data of each marker
         int i;
         for (i = 0; i < markerNum; i++){
-            //int markerType = (int) (msg -> markers[i].id); // starts from 0
+            int markerType = (int) (msg -> markers[i].id); // starts from 0
+            if(markerType >= markers->num) {
+                ROS_WARN("Unconfigurated marker");
+                return 1;
+            }
 
             // Obtain Quaternion info
             Quaternion quat;
@@ -222,7 +229,7 @@ namespace drone {
             h10.matrix[2][3] = msg -> markers[i].pose.pose.position.z;
 
             // Get marker data and transform it to a homogeneous matrix
-            MarkerData* markerData = markers->getMarker(msg -> markers[i].id); // marker -> drone
+            MarkerData* markerData = markers->getMarker(markerType); // marker -> drone
             HomogeneousMatrix h21 = *markerData;
             HomogeneousMatrix h20 = h10*h21; // kinect -> drone
             avg = avg + h20;
@@ -304,7 +311,6 @@ void* runClient(void* dataProcessor){
     // Initialize
     drone::DataProcessor* dp = (drone::DataProcessor*) dataProcessor;
     Client* client = dp->getClient();
-    cout << client << endl;
     ConfigParams* params = dp->getClientParams();
     SharedData* sharedData = dp -> getSharedData();
     int status = 0;
@@ -312,7 +318,6 @@ void* runClient(void* dataProcessor){
 
     pthread_mutex_lock(&printLock);
     status = clientInit(client, params);
-    cout << client << endl;
     pthread_mutex_unlock(&printLock);
     if(status != 0) {
         cout << "error initializing client" << endl;
@@ -333,8 +338,6 @@ void* runClient(void* dataProcessor){
     
     // Call callback functions
     dp->setClient(client);
-    Client* client2 = dp->getClient();
-    cout << client2 << endl;
     ros::spin();
     
     pthread_detach(pthread_self());

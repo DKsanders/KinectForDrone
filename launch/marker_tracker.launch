@@ -2,6 +2,6 @@
 	<node name="marker_tracker" pkg="drone" type="marker_tracker" respawn="false" output="screen">
 		<param name="client_configuration" type="string" value="$(find drone)/config/client.config"/>
 		<param name="server_configuration" type="string" value="$(find drone)/config/server.config"/>
-		<param name="marker_data" type="string" value="$(find drone)/data/marker_data"/>
+		<param name="marker_configuration" type="string" value="$(find drone)/config/marker.config"/>
 	</node>
 </launch>
