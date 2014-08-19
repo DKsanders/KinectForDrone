@@ -6,7 +6,7 @@
  */
 
 #include "drone/data_handling.h"
-#include "network/network.h"
+#include "drone/network.h"
 #include <iostream>
 
 using namespace std;

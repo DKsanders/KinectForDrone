@@ -18,6 +18,7 @@
 
 #define DEFAULT_BUF_SIZE 1024
 #define CONNECTION_WAIT_TIME 5 // Time between connection attempts made by client
+#define MAX_LISTENQUEUELEN 1
 
 using namespace std;
 
@@ -215,6 +216,71 @@ protected:
 
     // Buffer
     ByteStream stream;
+    
+};
+
+
+/********************************** TCP *********************************/
+// Server
+class Server_TCP : public Server
+{
+public:
+    Server_TCP();
+    Server_TCP(const char* host, const int port);
+    virtual ~Server_TCP();
+
+    virtual int init(const char* host, const int port);
+    virtual int accept();
+    virtual int send(ByteStream& stream);
+    virtual int receive();
+
+};
+
+// Client
+class Client_TCP : public Client
+{
+public:
+    Client_TCP();
+    Client_TCP(const char* host, const int port);
+    virtual ~Client_TCP();
+    
+    virtual int init(const char* host, const int port);
+    virtual int send(ByteStream& stream);
+    virtual int receive();
+    
+};
+
+/********************************** UDP *********************************/
+class Server_UDP : public Server
+{
+public:
+    Server_UDP();
+    Server_UDP(const char* host, const int port);
+    virtual ~Server_UDP();
+
+    virtual int init(const char* host, const int port);
+    virtual int accept();
+    virtual int send(ByteStream& stream);
+    virtual int receive();
+    
+protected:
+    struct sockaddr_in listenAddr;
+
+};
+
+class Client_UDP : public Client
+{
+public:
+    Client_UDP();
+    Client_UDP(const char* host, const int port);
+    virtual ~Client_UDP();
+    
+    virtual int init(const char* host, const int port);
+    virtual int send(ByteStream& stream);
+    virtual int receive();
+    
+protected:
+    struct sockaddr_in serverAddr;
     
 };
 

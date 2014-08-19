@@ -6,8 +6,7 @@
  */
 
 #include "drone/parsers.h"
-#include "network/tcp.h"
-#include "network/udp.h"
+#include "drone/network.h"
 #include <iostream>
 #include <sstream>
 #include <fstream>
