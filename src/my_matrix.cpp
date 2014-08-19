@@ -13,6 +13,170 @@
 
 using namespace std;
 
+Vector::Vector(){
+    size = 3;
+    vector = new double[size];
+    int i;
+    for(i=0; i<size; i++){
+        vector[i] = 0;
+    }
+}
+
+Vector::Vector(int _size){
+    size = _size;
+    vector = new double[size];
+    int i;
+    for(i=0; i<size; i++){
+        vector[i] = 0;
+    }
+}
+
+Vector::Vector(const MarkerData& data){
+    size = 3;
+    vector = new double[size];
+    this->vector[0] = data.dist_x;
+    this->vector[1] = data.dist_y;
+    this->vector[2] = data.dist_z;
+}
+
+Vector::Vector(const Vector& other){
+    size = other.size;
+    vector = new double[size];
+    int i;
+    for(i=0; i<size; i++){
+        vector[i] = other.vector[i];
+    }
+}
+
+Vector::~Vector(){
+    delete [] vector;
+}
+
+int Vector::getSize(){
+    return size;
+}
+
+double Vector::getNorm(){
+    int i;
+    double sum = 0;
+    for(i=0; i<size; i++){
+        sum += (vector[i]*vector[i]);
+    }
+    return sqrt(sum);
+}
+
+void Vector::normalize(){
+    double norm = getNorm();
+    int i;
+    for(i=0; i<size; i++) {
+        vector[i] = vector[i]/norm;
+    }
+}
+
+void Vector::print(){
+    int i;
+    cout << "Vector:" << endl;
+    for (i=0; i<size; i++){
+        cout << "  " << vector[i] << endl;
+    }
+}
+
+Vector& Vector::operator=(const Vector& rhs){
+    delete [] this->vector;
+    this->size = rhs.size;
+    this->vector = new double[size];
+    int i;
+    for(i=0; i<size; i++){
+        this->vector[i] = rhs.vector[i];
+    }
+    return *this;
+}
+
+Vector Vector::operator*(const Vector& rhs){
+    Vector rtn(3);
+    // Check that both are size 3
+    if(this->size != 3 || rhs.size != 3){
+        return rtn;
+    }
+    rtn.vector[0] = this->vector[1]*rhs.vector[2] - this->vector[2]*rhs.vector[1];
+    rtn.vector[1] = this->vector[2]*rhs.vector[0] - this->vector[0]*rhs.vector[2];
+    rtn.vector[2] = this->vector[0]*rhs.vector[1] - this->vector[1]*rhs.vector[0];
+    return rtn;
+}
+
+Vector Vector::operator+(const Vector& rhs){
+    Vector rtn;
+    // Check that both are size 3
+    if(this->size != rhs.size){
+        return rtn;
+    }
+    int i;
+    for(i=0; i<size; i++){
+        rtn.vector[i] = this->vector[i] + rhs.vector[i];
+    }
+    return rtn;
+}
+
+Vector Vector::operator-(const Vector& rhs){
+    Vector rtn;
+    // Check that both are same size
+    if(this->size != rhs.size){
+        return rtn;
+    }
+    int i;
+    for(i=0; i<size; i++){
+        rtn.vector[i] = this->vector[i] - rhs.vector[i];
+    }
+    return rtn;
+}
+
+Vector Vector::operator*(double rhs) {
+    Vector rtn;
+    int i;
+    for(i=0; i<size; i++){
+        rtn.vector[i] = this->vector[i] * rhs;
+    }
+    return rtn;
+}
+
+Vector Vector::operator/(double rhs) {
+    Vector rtn;
+    int i;
+    for(i=0; i<size; i++){
+        rtn.vector[i] = this->vector[i] / rhs;
+    }
+    return rtn;
+}
+
+Vector Vector::operator+(double rhs) {
+    Vector rtn;
+    int i;
+    for(i=0; i<size; i++){
+        rtn.vector[i] = this->vector[i] + rhs;
+    }
+    return rtn;
+}
+
+Vector Vector::operator-(double rhs) {
+    Vector rtn;
+    int i;
+    for(i=0; i<size; i++){
+        rtn.vector[i] = this->vector[i] - rhs;
+    }
+    return rtn;
+}
+
+Vector& Vector::operator=(const MarkerData& rhs){
+    delete [] this->vector;
+    this->size = 3;
+    this->vector = new double[size];
+    this->vector[0] = rhs.dist_x;
+    this->vector[1] = rhs.dist_y;
+    this->vector[2] = rhs.dist_z;
+
+    return *this;
+}
+
 void Quaternion::print(){
     cout << "---------------------------------------------------------------------"<< endl;
     cout << "Quaternion: " << endl;
@@ -54,9 +218,7 @@ RotationMatrix::RotationMatrix(const Quaternion& quat){
 }
 
 RotationMatrix::RotationMatrix(const MarkerData& rhs){
-    RotationMatrix temp;
-    temp = rhs;
-    *this = temp;
+    *this = rhs;
 }
 
 RotationMatrix::~RotationMatrix(){
@@ -245,21 +407,15 @@ HomogeneousMatrix::HomogeneousMatrix(){
 }
 
 HomogeneousMatrix::HomogeneousMatrix(const Quaternion& quat){
-    HomogeneousMatrix temp;
-    temp = quat;
-    *this = temp;
+    *this = quat;
 }
 
 HomogeneousMatrix::HomogeneousMatrix(const RotationMatrix& rhs){
-    HomogeneousMatrix temp;
-    temp = rhs;
-    *this = temp;
+    *this = rhs;
 }
 
 HomogeneousMatrix::HomogeneousMatrix(const MarkerData& rhs){
-    HomogeneousMatrix temp;
-    temp = rhs;
-    *this = temp;
+    *this = rhs;
 }
 
 HomogeneousMatrix::~HomogeneousMatrix(){
@@ -297,7 +453,7 @@ HomogeneousMatrix HomogeneousMatrix::getTranspose(){
 }
 
 void HomogeneousMatrix::invert(){
-    this->transpose();
+    ;
 }
 
 HomogeneousMatrix HomogeneousMatrix::getInverse(){
@@ -313,9 +469,15 @@ void HomogeneousMatrix::print(){
     cout << "  " << this->matrix[1][0]  << "  " << this->matrix[1][1]  << "  " << this->matrix[1][2] << "  " << this->matrix[1][3] << endl;
     cout << "  " << this->matrix[2][0]  << "  " << this->matrix[2][1]  << "  " << this->matrix[2][2] << "  " << this->matrix[2][3] << endl;
     cout << "  " << this->matrix[3][0]  << "  " << this->matrix[3][1]  << "  " << this->matrix[3][2] << "  " << this->matrix[3][3] << endl;
-    cout << "Roll: "  << roll << endl;
-    cout << "Pitch: "  << pitch << endl;
-    cout << "Yaw: "  << yaw << endl;
+    cout << "Roll: "  << roll*180/3.14159265358979323846 << endl;
+    cout << "Pitch: "  << pitch*180/3.14159265358979323846 << endl;
+    cout << "Yaw: "  << yaw*180/3.14159265358979323846 << endl;
+}
+
+void HomogeneousMatrix::calibrate(CalibrationData calib){
+    roll = roll - calib.getRoll();
+    pitch = pitch - calib.getPitch();
+    yaw = yaw - calib.getYaw();
 }
 
 HomogeneousMatrix HomogeneousMatrix::operator+(const HomogeneousMatrix& rhs){
@@ -465,42 +627,8 @@ DroneData HomogeneousMatrix::toData(){
     return rtn;
 }
 
-
 void HomogeneousMatrix::hm2rpy(){
     roll = atan2(matrix[2][1], matrix[2][2]);//*180/3.1415926535897;
     pitch = atan2(-1*matrix[2][0], sqrt(matrix[1][0]*matrix[1][0]+matrix[0][0]*matrix[0][0]));//*180/3.1415926535897;
     yaw = atan2(matrix[1][0], matrix[0][0]);//*180/3.1415926535897;
 }
-
-/*
-DroneData& DroneData::operator=(const RotationMatrix& rhs){
-    DroneData rtn(*this);
-    rtn.rm[0][0] = rhs.matrix[0][0];
-    rtn.rm[0][1] = rhs.matrix[0][1];
-    rtn.rm[0][2] = rhs.matrix[0][2];
-    rtn.rm[1][0] = rhs.matrix[1][0];
-    rtn.rm[1][1] = rhs.matrix[1][1];
-    rtn.rm[1][2] = rhs.matrix[1][2];
-    rtn.rm[2][0] = rhs.matrix[2][0];
-    rtn.rm[2][1] = rhs.matrix[2][1];
-    rtn.rm[2][2] = rhs.matrix[2][2];
-    return rtn;
-}
-
-DroneData& DroneData::operator=(const HomogeneousMatrix& rhs){
-    DroneData rtn(*this);
-    rtn.rm[0][0] = rhs.matrix[0][0];
-    rtn.rm[0][1] = rhs.matrix[0][1];
-    rtn.rm[0][2] = rhs.matrix[0][2];
-    rtn.rm[1][0] = rhs.matrix[1][0];
-    rtn.rm[1][1] = rhs.matrix[1][1];
-    rtn.rm[1][2] = rhs.matrix[1][2];
-    rtn.rm[2][0] = rhs.matrix[2][0];
-    rtn.rm[2][1] = rhs.matrix[2][1];
-    rtn.rm[2][2] = rhs.matrix[2][2];
-    rtn.dist_x = rhs.matrix[0][3];
-    rtn.dist_y = rhs.matrix[1][3];
-    rtn.dist_z = rhs.matrix[2][3];
-    return rtn;
-}
-*/

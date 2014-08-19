@@ -15,6 +15,38 @@
 
 using namespace std;
 
+// Vector
+class Vector{
+public:
+  double* vector;
+
+  Vector();
+  Vector(int _size);
+  Vector(const MarkerData& data);
+  Vector(const Vector& other);
+  ~Vector();
+
+  // Accessors
+  int getSize();
+
+  double getNorm();
+  void normalize();
+  void print();
+
+  Vector& operator=(const Vector& rhs);
+  Vector operator*(const Vector& rhs); // cross-product
+  Vector operator+(const Vector& rhs);
+  Vector operator-(const Vector& rhs); 
+  Vector operator*(double rhs); 
+  Vector operator/(double rhs);
+  Vector operator+(double rhs);
+  Vector operator-(double rhs); 
+  Vector& operator=(const MarkerData& rhs);
+
+private:
+  int size;
+};
+
 // Quaternion
 struct Quaternion{
   double w, x, y, z;
@@ -69,8 +101,9 @@ public:
   void transpose();
   HomogeneousMatrix getTranspose();
   void invert();
-  HomogeneousMatrix getInverse();
+  HomogeneousMatrix getInverse(); // NOT IMPLEMENTED
   void print();
+  void calibrate(CalibrationData calib);
   DroneData toData();
   void hm2rpy();
 
@@ -89,17 +122,5 @@ public:
 private:
 
 };
-
-/**
- * Converts a Quaternion to a Rotatino Matrix
- * Arguments:
- *  quat(INPUT) - a pointer to a quaternion structure to be converted
- * Return:
- *  a pointer to a rotation matrix struct, created using new
- */
-//RotationMatrix* quat2rm(Quaternion* quat); 
-
-//DroneData& DroneData::operator=(const RotationMatrix& rhs);
-//DroneData& DroneData::operator=(const HomogeneousMatrix& rhs);
 
 #endif //END_IF_MY_MATRIX_H

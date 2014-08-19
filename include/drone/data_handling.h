@@ -13,6 +13,32 @@
 
 using namespace std;
 
+class CalibrationData {
+public:
+  CalibrationData();
+  CalibrationData(double _rollCriterion, double _pitchCriterion, double _yawCriterion);
+  ~CalibrationData();
+
+  // Accessors
+  double getRoll() {return rollOffset;};
+  double getPitch() {return pitchOffset;};
+  double getYaw() {return yawOffset;};
+
+  // Callibrating
+  void calibrateRPY(double roll, double pitch, double yaw);
+
+private:
+  double rollCriterion;
+  double pitchCriterion;
+  double yawCriterion;
+
+  double rollOffset;
+  double pitchOffset;
+  double yawOffset;
+
+  int sampleNum; // number of current samples processed
+};
+
 // Data passed to drone
 class DroneData{
 public:

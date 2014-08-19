@@ -5,7 +5,26 @@
  * proccesses the data to estimate the attitude of the drone,
  * and sends the data to the drone via wifi. 
  *
+ * This program was run on Ubuntu 12.10 with ROS hydro
+ *
  * Author: David Sanders <david.sanders@mail.utoronto.ca>
+ *
+ * Bugs/Issues
+ *  -Program exits with an error (possibly freeing memory twice?)
+ *
+ * Areas of Improvemnet
+ *  - Replace my_matrix functions with proper matrix labraries or tf functions in ROS
+ *  - Calibration method (calibrateRPY) could be improved
+ *  - The data from the kinect is precessed in processDataToDrone() on line 224;
+ *    If the user wishes to make changes on how to process this data (e.g. replace
+ *    the my_matrix functions, use /tf messages instead of ARMarkers, etc), then there
+ *    should only be a need to modify this function
+ *
+ * Other comments
+ *  - Currently, data will be processed only if the kinect sees exactly 4 markers,
+ *    which should be in the following layout:
+ *                         3
+ *                2        4        1
  */
 
 
@@ -53,6 +72,11 @@ namespace drone {
         pthread_mutex_init(&sharedDataLock, NULL);
         pthread_mutex_init(&printLock, NULL);
         sharedData = new SharedData;
+        clientParams = new ConfigParams;
+        serverParams = new ConfigParams;
+        markers = new MarkerDataSet;
+        calibData = new CalibrationData;
+        sampleNum = 0;
         seqToDrone = 0;
         seqFromDrone = 0;
         pthread_t clientThreadID, serverThreadID;
@@ -89,11 +113,11 @@ namespace drone {
 
         // Read config file for network
         status += networkParser.readConfig(server_config.c_str());
-        serverParams = networkParser.getConfig();
+        *serverParams = networkParser.getConfig();
         status += networkParser.readConfig(client_config.c_str());
-        clientParams = networkParser.getConfig();
+        *clientParams = networkParser.getConfig();
         status += markerParser.readMarkers(marker_data.c_str());
-        markers = markerParser.getMarkers();
+        *markers = markerParser.getMarkers();
         if(status != 0){
             //Error reading config file
             ROS_FATAL("Error reading config file(s)");
@@ -122,9 +146,9 @@ namespace drone {
         delete sharedData;
         if(server != NULL) delete server;
         if(client != NULL) delete client;
-        if(clientParams != NULL) delete clientParams;
-        if(serverParams != NULL) delete serverParams;
-        if(markers != NULL) delete markers;
+        delete clientParams;
+        delete serverParams;
+        delete markers;
     }
 
     int DataProcessor::getSeqFromDrone(){
@@ -181,33 +205,38 @@ namespace drone {
             // Process data
             int status = 0;
             DroneData data;
-            status = processDataToDrone(msg, seqToDrone, data);
+            status = processDataToDrone(msg, data);
             if(status != 0){
                 // Error processing data
                 return;
             }
+            data.print();
             ByteStream stream = data.serialize();
             // Send the message
             if (client->send(stream)) {
                 // Couldn't send
                 ROS_INFO("failed to send to drone");
-            }
-            seqToDrone += 1;    
+            } 
         }
+        seqToDrone += 1;   
     }
 
-    int DataProcessor::processDataToDrone(const drone::ARMarkers::ConstPtr &msg, const int seq, DroneData& data){
+    int DataProcessor::processDataToDrone(const drone::ARMarkers::ConstPtr &msg, DroneData& data){
         // Interpret marker data
         int markerNum = msg -> markers.size();
-        if(markerNum < 4) { 
-            return 1;
-        }
-        HomogeneousMatrix avg; // average of marker data
-        avg.matrix[3][3] = 0;
-        HomogeneousMatrix h02offset; // Auxilary matrix, h02 when roll/pitch/yaw = 0
+
+        // Only work with 4 markers
+        if(markerNum != 4) { return 1; }
+        
+        // Auxilary matrix, h02 when roll/pitch/yaw = 0
+        HomogeneousMatrix h02offset; 
         h02offset.matrix[0][2] = 1;
         h02offset.matrix[1][0] = 1;
         h02offset.matrix[2][1] = 1;
+        // Vectors from kinect to markers
+        Vector vectors[4];
+        // For keeping an average
+        HomogeneousMatrix avg;
 
         // Process data of each marker
         int i;
@@ -231,26 +260,67 @@ namespace drone {
             h10.matrix[1][3] = msg -> markers[i].pose.pose.position.y;
             h10.matrix[2][3] = msg -> markers[i].pose.pose.position.z;
 
-            // Get marker data and transform it to a homogeneous matrix
-            MarkerData* markerData = markers->getMarker(markerType); // marker -> drone
-            HomogeneousMatrix h21 = *markerData;
-            HomogeneousMatrix h20 = h10*h21; // kinect -> drone
-            avg = avg + h20;
-        }
-        // Take average of markers
-        avg = avg/markerNum;
+            // Create vectors
+            vectors[markerType].vector[0] = msg -> markers[i].pose.pose.position.x;
+            vectors[markerType].vector[1] = msg -> markers[i].pose.pose.position.y;
+            vectors[markerType].vector[2] = msg -> markers[i].pose.pose.position.z;
 
-        // Calculate RPY
-        HomogeneousMatrix rpy = h02offset*avg;
-        if(avg.matrix[2][0] == 1 || avg.matrix[2][0] == -1 ){
+            // Get marker data and transform it to a homogeneous matrix
+            MarkerData markerData = markers->getMarker(markerType); // marker -> drone
+            HomogeneousMatrix h21 = markerData;
+            HomogeneousMatrix h20 = h10*h21; // kinect -> drone
+            
+            // Calculate RPY from marker orientation
+            HomogeneousMatrix rpy = h02offset*h20;
+            if(rpy.matrix[2][0] == 1 || rpy.matrix[2][0] == -1 ){
+                // Singularity in the homogeneous matrix - unable to calculate roll/pitch/yaw
+                return 1;
+            } else {
+                rpy.hm2rpy();
+            }
+            avg = avg + rpy;
+        }
+        // Find average
+        avg = avg/markerNum;
+        // Find vectors representing x and y
+        Vector vec_x = vectors[0]-vectors[1];
+        vec_x.normalize();
+        Vector vec_y = vectors[3]-vectors[2];
+        vec_y.normalize();
+        Vector cross = vec_x * vec_y;
+        RotationMatrix rm;
+        rm.matrix[0][1] = vec_x.vector[0];
+        rm.matrix[1][1] = vec_x.vector[1];
+        rm.matrix[2][1] = vec_x.vector[2];
+        rm.matrix[0][2] = vec_y.vector[0];
+        rm.matrix[1][2] = vec_y.vector[1];
+        rm.matrix[2][2] = vec_y.vector[2];
+        rm.matrix[0][0] = cross.vector[0];
+        rm.matrix[1][0] = cross.vector[1];
+        rm.matrix[2][0] = cross.vector[2];
+        HomogeneousMatrix hm = rm;
+        HomogeneousMatrix h20 = h02offset*hm; // kinect -> drone
+        if(h20.matrix[2][0] == 1 || h20.matrix[2][0] == -1 ){
             // Singularity in the homogeneous matrix - unable to calculate roll/pitch/yaw
             return 1;
         } else {
-            rpy.hm2rpy();
+            h20.hm2rpy();
         }
-        data = rpy.toData();
-        data.setSeq(seq);
-        data.print();
+
+        avg = (avg+h20)/2;
+
+        // Find offset if not done
+        if(sampleNum < CALIBRATION_SAMPLE_NUMBER){
+            calibData -> calibrateRPY(h20.roll, h20.pitch, h20.yaw);
+            sampleNum += 1;
+            return 1;
+        }
+
+        // Calibrate data
+        h20.calibrate(*calibData);
+
+        data = h20.toData();
+        data.setSeq(seqToDrone);
         return 0;
     }
 }
@@ -341,6 +411,12 @@ void* runClient(void* dataProcessor){
     
     // Call callback functions
     dp->setClient(client);
+
+    /*
+    ros::AsyncSpinner spinner(2);// 2 threads
+    spinner.start();
+    ros::waitForShutdown();
+    */
     ros::spin();
     
     pthread_detach(pthread_self());

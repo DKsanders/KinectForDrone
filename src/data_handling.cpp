@@ -11,6 +11,58 @@
 
 using namespace std;
 
+CalibrationData::CalibrationData(){
+  rollCriterion = 0;
+  pitchCriterion = 0;
+  yawCriterion = 0;
+
+  rollOffset = 0;
+  pitchOffset = 0;
+  yawOffset = 0;
+
+  sampleNum = 0;
+}
+
+CalibrationData::CalibrationData(double _rollCriterion, double _pitchCriterion, double _yawCriterion){
+  rollCriterion = _rollCriterion;
+  pitchCriterion = _pitchCriterion;
+  yawCriterion = _yawCriterion;
+
+  rollOffset = 0;
+  pitchOffset = 0;
+  yawOffset = 0;
+
+  sampleNum = 0;
+}
+
+CalibrationData::~CalibrationData(){
+    ;
+}
+
+void CalibrationData::calibrateRPY(double roll, double pitch, double yaw){
+    // Calibrate using running average
+    double rollTotal = sampleNum * (rollOffset+rollCriterion) + roll;
+    double pitchTotal = sampleNum * (pitchOffset+pitchCriterion) + pitch;
+    double yawTotal = sampleNum * (yawOffset+yawCriterion) + yaw;
+    
+    sampleNum += 1;
+    rollOffset = rollTotal / sampleNum;
+    pitchOffset = pitchTotal / sampleNum;
+    yawOffset = yawTotal / sampleNum;
+
+    cout << "current offsets" << endl;
+    cout << "  roll: " << rollOffset*180/3.14159265358979323846 << endl;
+    cout << "  pitch: " << pitchOffset*180/3.14159265358979323846 << endl;
+    cout << "  yaw: " << yawOffset*180/3.14159265358979323846 << endl;
+
+    if(sampleNum == 10){
+        cout << "Done calibrating. The offsets are:" << endl;
+        cout << "  roll: " << rollOffset*180/3.14159265358979323846 << endl;
+        cout << "  pitch: " << pitchOffset*180/3.14159265358979323846 << endl;
+        cout << "  yaw: " << yawOffset*180/3.14159265358979323846 << endl;
+    }
+}
+
 DroneData::DroneData(){
     comment = "";
 }

@@ -26,6 +26,7 @@
 // Constants
 #define PUB_BUFFER_SIZE 1
 #define SUB_BUFFER_SIZE 0
+#define CALIBRATION_SAMPLE_NUMBER 10 // number of samples to use for callibrating rpy
 
 using namespace std;
 
@@ -67,6 +68,7 @@ namespace drone
   private:
     // Variables
     ros::NodeHandle n;
+    int sampleNum; // Keeps track of number of samples processed for calibration
     int seqToDrone; // sequence number for data sent
     int seqFromDrone; // sequence number for data recieved
     Client* client; // to drone
@@ -75,6 +77,7 @@ namespace drone
     ConfigParams* serverParams;
     MarkerDataSet* markers;
     SharedData* sharedData;
+    CalibrationData* calibData;
 
     // Subscribe to topics
     void arPoseMarkersCallback(const drone::ARMarkers::ConstPtr &msg);
@@ -84,13 +87,13 @@ namespace drone
     /**
      * Processes the raw data of markers into DroneData
      * Arguments:
-     *  msg(INPUT) - DroneData that needs to be serialized
-     *  seq(INPUT) - buffer for holding byte stream
-     *  DroneData(OUTPUT) - number of bytes in byte stream
+     *  msg(INPUT) - message received from publisher in ar_kinect node
+     *  seq(INPUT) - sequence number
+     *  DroneData(OUTPUT) - DroneData, seen from kinect's frame at origin (position and orientation at 0)
      * Return:
      *  0 if successful
      */
-    int processDataToDrone(const drone::ARMarkers::ConstPtr &msg, const int seq, DroneData& data);
+    int processDataToDrone(const drone::ARMarkers::ConstPtr &msg, DroneData& data);
 
     // Parameters
     string client_config;

@@ -21,26 +21,47 @@ ConfigParams::ConfigParams() {
 	type = 0;
 }
 
+ConfigParams::ConfigParams(const ConfigParams& other) {
+	this->state = other.state;
+	this->port = other.port;
+	this->type = other.type;
+	int length = strlen(other.host)+1;
+	this->host = new char[length];
+	memcpy(this->host, other.host, length);
+}
+
 ConfigParams::~ConfigParams() {
+	del();
+}
+
+void ConfigParams::del() {
 	if(host != NULL){
 		delete host;
 	}
 }
 
+ConfigParams& ConfigParams::operator=(const ConfigParams& rhs){
+	// Initialize
+	del();
+
+	this->state = rhs.state;
+	this->port = rhs.port;
+	this->type = rhs.type;
+	int length = strlen(rhs.host)+1;
+	this->host = new char[length];
+	memcpy(this->host, rhs.host, length);
+	return *this;
+}
+
 NetworkConfigParser::NetworkConfigParser(){
 	currentLine = 1;
-	data = NULL;
 }
 
 NetworkConfigParser::~NetworkConfigParser(){
-	/*
-	if(data != NULL) {
-		delete data;
-	}
-	*/
+	;
 }
 
-ConfigParams* NetworkConfigParser::getConfig(){
+ConfigParams NetworkConfigParser::getConfig(){
 	return data;
 }
 
@@ -55,7 +76,6 @@ int NetworkConfigParser::readConfig(const char* filePath){
 	cout << "PROCESSING: "<< filePath << endl;
 	
 	// Initialize
-	data = new ConfigParams;
 	string line;
 	int status = 0;
 	while(getline(file, line)){
@@ -63,19 +83,19 @@ int NetworkConfigParser::readConfig(const char* filePath){
 		status += parseLine(line);
 		currentLine += 1;
 	}
-	if(data->state == 0) {
+	if(data.state == 0) {
 		cout << "STATE not specified in file, specify either ON or 'OFF'" << endl;
 		status = 1;
 	}
-	if(data->host == NULL) {
+	if(data.host == NULL) {
 		cout << "HOST not specified in file, specify either the host number 'XXX.XXX.XXX.XXX'" << endl;
 		status = 1;
 	}
-	if(data->port == 0) {
+	if(data.port == 0) {
 		cout << "PORT not specified in file, specify the a valid port number" << endl;
 		status = 1;
 	}
-	if(data->type == 0) {
+	if(data.type == 0) {
 		cout << "NETWORK not specified in file, specify either 'UDP' or 'TCP'" << endl;
 		status = 1;
 	}
@@ -88,7 +108,11 @@ int NetworkConfigParser::readConfig(const char* filePath){
 	return 0;
 }
 
-int NetworkConfigParser::parseLine(const string& line){
+int NetworkConfigParser::parseLine(const string& _line){
+	stringstream ss(_line);
+	string line;
+	getline(ss, line);
+
 	// Check if line should be ignored
 	if(line.empty() || line[0] == COMMENT_CHAR){
 		// Parsing a comment; ignore
@@ -114,26 +138,26 @@ int NetworkConfigParser::parseLine(const string& line){
 		string host;
 		status = extractHost(value, host);
 		if(status == 0){
-			data -> host = new char[host.length()+1];
-			strcpy(data -> host, host.c_str());
+			data.host = new char[host.length()+1];
+			strcpy(data.host, host.c_str());
 		}
 	} else if (name == "PORT") {
 		int port;
 		status = extractPort(value, port);
 		if(status == 0){
-			data -> port = port;
+			data.port = port;
 		}
 	} else if (name == "NETWORK") {
 		int type;
 		status = extractType(value, type);
 		if(status == 0){
-			data -> type = type;
+			data.type = type;
 		}
 	} else if (name == "STATE") {
 		if(value == "ON" || value == "on" || value == "On" || value == "1"){
-			data -> state = ON;
+			data.state = ON;
 		} else if (value == "OFF" || value == "off" || value == "Off" || value == "0"){
-			data -> state = OFF;
+			data.state = OFF;
 		} else {
 			status = 1;
 		}
@@ -236,7 +260,27 @@ MarkerDataSet::MarkerDataSet(){
 	array = NULL;
 }
 
+MarkerDataSet::MarkerDataSet(const MarkerDataSet& other){
+	// Initialize
+	int i;
+	this->num = other.num;
+	this->array = new MarkerData*[this->num];
+	for(i=0; i<num; i++){
+    	array[i] = new MarkerData;
+    	*(array[i]) = *(other.array[i]);
+	}
+}
+
 MarkerDataSet::~MarkerDataSet(){
+	deleteMarkers();
+}
+
+MarkerData MarkerDataSet::getMarker(int id){
+    return *(array[id]);
+}
+
+void MarkerDataSet::deleteMarkers(){
+	// Delete all initialized markers
 	if(array != NULL){
     	int i;
     	for(i=0; i<num; i++){
@@ -246,25 +290,30 @@ MarkerDataSet::~MarkerDataSet(){
 	}
 }
 
-MarkerData* MarkerDataSet::getMarker(int id){
-    return array[id];
+MarkerDataSet& MarkerDataSet::operator=(const MarkerDataSet& rhs){
+	// Initialize
+	int i;
+	deleteMarkers();
+
+	this->num = rhs.num;
+	this->array = new MarkerData*[this->num];
+	for(i=0; i<num; i++){
+    	array[i] = new MarkerData;
+    	*(array[i]) = *(rhs.array[i]);
+	}
+	return *this;
 }
 
 MarkerFileParser::MarkerFileParser(){
 	currentLine = 1;
 	lineCount = 0;
-	data = NULL;
 }
 
 MarkerFileParser::~MarkerFileParser(){
-	/*
-	if (data != NULL){
-		delete data;
-	}
-	*/
+	;
 }
 
-MarkerDataSet* MarkerFileParser::getMarkers(){
+MarkerDataSet MarkerFileParser::getMarkers(){
 	return data;
 }
 
@@ -287,13 +336,13 @@ int MarkerFileParser::readMarkers(const char* markers){
 		status += parseLine(line);
 		currentLine += 1;
 	}
-	int correctCount = data->num * 6 + 1;
+	int correctCount = data.num * 6 + 1;
 	if(lineCount < correctCount){
-        cout << "Not enough data for " << data->num << " markers" << endl;
+        cout << "Not enough data for " << data.num << " markers" << endl;
         status = 1;
 	}
 	if(lineCount > correctCount){
-        cout << "Too much data for " << data->num << " markers" << endl;
+        cout << "Too much data for " << data.num << " markers" << endl;
         status = 1;
 	}
 	if(status != 0){
@@ -305,8 +354,12 @@ int MarkerFileParser::readMarkers(const char* markers){
 	return 0;
 }
 
-int MarkerFileParser::parseLine(const string& line){
+int MarkerFileParser::parseLine(const string& _line){
 	// Check if line should be ignored
+	stringstream ss(_line);
+	string line;
+	getline(ss, line);
+
 	if(line.empty() || line[0] == COMMENT_CHAR){
 		// Parsing a comment or whitespace - ignore
 		return 0;
@@ -339,14 +392,13 @@ int MarkerFileParser::parseLine(const string& line){
 
 int MarkerFileParser::parseMarkerNum(const string& line){
 	// Initialize
-	data = new MarkerDataSet;
 	stringstream ss(line);
-	ss >> data->num;
-	if(!ss.eof() || data->num < 1){
+	ss >> data.num;
+	if(!ss.eof() || data.num < 1){
 		// invalid line
 		return 1;
 	}
-	data->array = new MarkerData*[data->num];
+	data.array = new MarkerData*[data.num];
 	return 0;
 }
 
@@ -354,17 +406,17 @@ int MarkerFileParser::parseRow(const string& line){
 	// Initialize
 	stringstream ss(line);
 	if(index == 0){
-		data->array[currentMarker] = new MarkerData;
+		data.array[currentMarker] = new MarkerData;
 	}
-	ss >> data->array[currentMarker]->rm[index][0];
+	ss >> data.array[currentMarker]->rm[index][0];
 	if(ss.fail()){
 		return 1;
 	}
-	ss >> data->array[currentMarker]->rm[index][1];
+	ss >> data.array[currentMarker]->rm[index][1];
 	if(ss.fail()){
 		return 1;
 	}
-	ss >> data->array[currentMarker]->rm[index][2];
+	ss >> data.array[currentMarker]->rm[index][2];
 	if(!ss.eof()){
 		return 1;
 	}
@@ -376,11 +428,11 @@ int MarkerFileParser::parseDistance(const string& line){
 	// Initialize
 	stringstream ss(line);
 	if(index == 3){
-		ss >> data->array[currentMarker]->dist_x;
+		ss >> data.array[currentMarker]->dist_x;
 	} else if(index == 4){
-		ss >> data->array[currentMarker]->dist_y;
+		ss >> data.array[currentMarker]->dist_y;
 	} else if(index == 5){
-		ss >> data->array[currentMarker]->dist_z;
+		ss >> data.array[currentMarker]->dist_z;
 	}
 	if(!ss.eof()){
 		return 1;

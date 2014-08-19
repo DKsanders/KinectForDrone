@@ -50,12 +50,17 @@ using namespace std;
 // Structure for holding the configuration parameters
 struct ConfigParams{
   ConfigParams();
+  ConfigParams(const ConfigParams& other);
   ~ConfigParams();
   // Configuration variables
   int state; // 0 is off, 1 is on
   char* host; // "XXX.XXX.XXX.XXX" format
   int port;
   int type;
+
+  void del();
+
+  ConfigParams& operator=(const ConfigParams& rhs);
 
 };
 
@@ -65,7 +70,7 @@ public:
   ~NetworkConfigParser();
 
   // Accessors
-  ConfigParams* getConfig();
+  ConfigParams getConfig();
 
   /**
    * Reads in a network config file and parses it
@@ -78,9 +83,9 @@ public:
 
 private:
   int currentLine; // line number of config file being processed
-  ConfigParams* data;
+  ConfigParams data;
 
-  int parseLine(const string& line);
+  int parseLine(const string& _line);
   int extractHost(const string& line, string& host);
   int extractPort(const string& line, int& port);
   int extractType(const string& line, int& type);
@@ -110,11 +115,16 @@ struct MarkerData{
 // Structure for holding all marker data
 struct MarkerDataSet{
   MarkerDataSet();
+  MarkerDataSet(const MarkerDataSet& other);
   ~MarkerDataSet();
   int num;
-  struct MarkerData** array; // array of pointers to markers
+  MarkerData** array; // array of pointers to markers
 
-  struct MarkerData* getMarker(int id);
+  MarkerData getMarker(int id);
+
+  void deleteMarkers();
+
+  MarkerDataSet& operator=(const MarkerDataSet& rhs);
 
 };
 
@@ -124,7 +134,7 @@ public:
   ~MarkerFileParser();
 
   // Accessors
-  MarkerDataSet* getMarkers();
+  MarkerDataSet getMarkers();
   
   /**
    * Reads in a marker data file and parses it
@@ -140,7 +150,7 @@ private:
   int lineCount; // line number of marker data file being processed excluding comments, whitespace and invalid lines
   int currentMarker; // the N-th marker being processed
   int index; // 0~5, 0~2 specify rotation matrix and 3~5 specify distance
-  MarkerDataSet* data; // parsed data
+  MarkerDataSet data; // parsed data
 
   /**
    * Parses a single line of from a marker data file
@@ -149,7 +159,7 @@ private:
    * Return:
    *  0 if successful
    */
-  int parseLine(const string& line);
+  int parseLine(const string& _line);
   int parseMarkerNum(const string& line);
   int parseRow(const string& line);
   int parseDistance(const string& line);
