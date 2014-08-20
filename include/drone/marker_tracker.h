@@ -53,13 +53,13 @@ namespace drone
     ~DataProcessor ();
     
     // Accessors
-    int getSeqFromDrone();
-    Client* getClient();
-    Server* getServer();
-    ConfigParams* getClientParams();
-    ConfigParams* getServerParams();
-    SharedData* getSharedData();
-    MarkerDataSet* getMarkerDataSet();
+    int getSeqFromDrone() {return seqFromDrone;};
+    Client* getClient() {return client;};
+    Server* getServer() {return server;};
+    ConfigParams* getClientParams() {return clientParams;};
+    ConfigParams* getServerParams() {return serverParams;};
+    SharedData* getSharedData() {return sharedData;};
+    MarkerDataSet* getMarkerDataSet() {return markers;};
 
     // Mutators
     void setClient(Client* _client);

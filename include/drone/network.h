@@ -33,10 +33,10 @@ public:
     ~ByteStream();
 
     // Accessors
-    int getWriteIndex();
-    int getReadIndex();
-    int getBufSize();
-    char* getBuf();
+    int getWriteIndex() {return writeIndex;};
+    int getReadIndex() {return readIndex;};
+    int getBufSize() {return bufSize;};
+    char* getBufHead() {return buf;};
 
     // Mutators
     void setWriteIndex(int _writeIndex);
@@ -140,7 +140,7 @@ public:
     // Accessors
     int getListeningSock(){ return listeningSock; };
     int getClientSock(){ return clientSock; };
-    char* getBuf() {return stream.getBuf();};
+    char* getBufHead() {return stream.getBufHead();};
     int getBufSize() {return stream.getBufSize();};
     ByteStream getStream() { return stream;};
 
@@ -192,7 +192,6 @@ public:
     		close(sockfd);
     	}
     };
-
     
     // Reading from buffer
     int read(int& data) {return stream.read(data);};
@@ -206,7 +205,7 @@ public:
 
     // Accessors
     int getSockfd(){ return sockfd; };
-    char* getBuf() {return stream.getBuf();};
+    char* getBufHead() {return stream.getBufHead();};
     int getBufSize() {return stream.getBufSize();};
     ByteStream getStream() {return stream;};
     

@@ -16,21 +16,23 @@ using namespace std;
 class CalibrationData {
 public:
   CalibrationData();
-  CalibrationData(double _rollCriterion, double _pitchCriterion, double _yawCriterion);
   ~CalibrationData();
 
   // Accessors
+  double getX() {return xOffset;};
+  double getY() {return yOffset;};
+  double getZ() {return zOffset;};
   double getRoll() {return rollOffset;};
   double getPitch() {return pitchOffset;};
   double getYaw() {return yawOffset;};
 
   // Callibrating
-  void calibrateRPY(double roll, double pitch, double yaw);
+  void calibrate(double x, double y, double z, double roll, double pitch, double yaw);
 
 private:
-  double rollCriterion;
-  double pitchCriterion;
-  double yawCriterion;
+  double xOffset;
+  double yOffset;
+  double zOffset;
 
   double rollOffset;
   double pitchOffset;
@@ -58,7 +60,7 @@ public:
   string comment;
 
   // Accessors
-  int getSeq();
+  int getSeq() {return seq;};
 
   // Mutators
   void setSeq(int _seq);

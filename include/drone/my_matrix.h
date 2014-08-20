@@ -27,7 +27,7 @@ public:
   ~Vector();
 
   // Accessors
-  int getSize();
+  int getSize() {return size;};
 
   double getNorm();
   void normalize();

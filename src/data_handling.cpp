@@ -12,21 +12,9 @@
 using namespace std;
 
 CalibrationData::CalibrationData(){
-  rollCriterion = 0;
-  pitchCriterion = 0;
-  yawCriterion = 0;
-
-  rollOffset = 0;
-  pitchOffset = 0;
-  yawOffset = 0;
-
-  sampleNum = 0;
-}
-
-CalibrationData::CalibrationData(double _rollCriterion, double _pitchCriterion, double _yawCriterion){
-  rollCriterion = _rollCriterion;
-  pitchCriterion = _pitchCriterion;
-  yawCriterion = _yawCriterion;
+  xOffset = 0;
+  yOffset = 0;
+  zOffset = 0;
 
   rollOffset = 0;
   pitchOffset = 0;
@@ -39,24 +27,28 @@ CalibrationData::~CalibrationData(){
     ;
 }
 
-void CalibrationData::calibrateRPY(double roll, double pitch, double yaw){
+void CalibrationData::calibrate(double x, double y, double z, double roll, double pitch, double yaw){
     // Calibrate using running average
-    double rollTotal = sampleNum * (rollOffset+rollCriterion) + roll;
-    double pitchTotal = sampleNum * (pitchOffset+pitchCriterion) + pitch;
-    double yawTotal = sampleNum * (yawOffset+yawCriterion) + yaw;
+    double xTotal = sampleNum * xOffset + x;
+    double yTotal = sampleNum * yOffset + y;
+    double zTotal = sampleNum * zOffset + z;
+    double rollTotal = sampleNum * rollOffset + roll;
+    double pitchTotal = sampleNum * pitchOffset + pitch;
+    double yawTotal = sampleNum * yawOffset + yaw;
     
     sampleNum += 1;
+    xOffset = xTotal / sampleNum;
+    yOffset = yTotal / sampleNum;
+    zOffset = zTotal / sampleNum;
     rollOffset = rollTotal / sampleNum;
     pitchOffset = pitchTotal / sampleNum;
     yawOffset = yawTotal / sampleNum;
 
-    cout << "current offsets" << endl;
-    cout << "  roll: " << rollOffset*180/3.14159265358979323846 << endl;
-    cout << "  pitch: " << pitchOffset*180/3.14159265358979323846 << endl;
-    cout << "  yaw: " << yawOffset*180/3.14159265358979323846 << endl;
-
     if(sampleNum == 10){
         cout << "Done calibrating. The offsets are:" << endl;
+        cout << "  dist_x: " << xOffset << endl;
+        cout << "  dist_y: " << yOffset << endl;
+        cout << "  dist_z: " << zOffset << endl;
         cout << "  roll: " << rollOffset*180/3.14159265358979323846 << endl;
         cout << "  pitch: " << pitchOffset*180/3.14159265358979323846 << endl;
         cout << "  yaw: " << yawOffset*180/3.14159265358979323846 << endl;
@@ -73,10 +65,6 @@ DroneData::DroneData(ByteStream& stream){
 
 DroneData::~DroneData() {
     ;
-}
-
-int DroneData::getSeq() {
-    return seq;
 }
 
 void DroneData::setSeq(int _seq) {

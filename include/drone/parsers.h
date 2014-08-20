@@ -70,7 +70,7 @@ public:
   ~NetworkConfigParser();
 
   // Accessors
-  ConfigParams getConfig();
+  ConfigParams getConfig() {return data;};;
 
   /**
    * Reads in a network config file and parses it
@@ -85,7 +85,7 @@ private:
   int currentLine; // line number of config file being processed
   ConfigParams data;
 
-  int parseLine(const string& _line);
+  int parseLine(const string& line);
   int extractHost(const string& line, string& host);
   int extractPort(const string& line, int& port);
   int extractType(const string& line, int& type);
@@ -120,7 +120,7 @@ struct MarkerDataSet{
   int num;
   MarkerData** array; // array of pointers to markers
 
-  MarkerData getMarker(int id);
+  MarkerData getMarker(int id) {return *(array[id]);};;
 
   void deleteMarkers();
 
@@ -134,7 +134,7 @@ public:
   ~MarkerFileParser();
 
   // Accessors
-  MarkerDataSet getMarkers();
+  MarkerDataSet getMarkers() {return data;};
   
   /**
    * Reads in a marker data file and parses it
@@ -159,7 +159,7 @@ private:
    * Return:
    *  0 if successful
    */
-  int parseLine(const string& _line);
+  int parseLine(const string& line);
   int parseMarkerNum(const string& line);
   int parseRow(const string& line);
   int parseDistance(const string& line);

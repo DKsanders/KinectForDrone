@@ -52,10 +52,6 @@ Vector::~Vector(){
     delete [] vector;
 }
 
-int Vector::getSize(){
-    return size;
-}
-
 double Vector::getNorm(){
     int i;
     double sum = 0;
@@ -478,6 +474,9 @@ void HomogeneousMatrix::calibrate(CalibrationData calib){
     roll = roll - calib.getRoll();
     pitch = pitch - calib.getPitch();
     yaw = yaw - calib.getYaw();
+    matrix[0][3] = matrix[0][3] - calib.getX();
+    matrix[1][3] = matrix[1][3] - calib.getY();
+    matrix[2][3] = matrix[2][3] - calib.getZ();
 }
 
 HomogeneousMatrix HomogeneousMatrix::operator+(const HomogeneousMatrix& rhs){

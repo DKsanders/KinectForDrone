@@ -61,22 +61,6 @@ ByteStream::~ByteStream(){
 	delete [] buf;
 }
 
-int ByteStream::getWriteIndex(){
-	return writeIndex;
-}
-
-int ByteStream::getReadIndex(){
-	return readIndex;
-}
-
-int ByteStream::getBufSize(){
-	return bufSize;
-}
-
-char* ByteStream::getBuf(){
-	return buf;
-}
-
 void ByteStream::setWriteIndex(int _writeIndex){
 	writeIndex = _writeIndex;
 }
@@ -365,7 +349,7 @@ int Server_TCP::send(ByteStream& stream){
     size_t tosend = stream.getWriteIndex() + sizeof(int); // bytes needed to be sent
 
     // Start sending
-    char* head = send.getBuf();
+    char* head = send.getBufHead();
     while (tosend > 0){
         ssize_t bytes = ::send(clientSock, head, tosend, 0);
         if (bytes <= 0) {
@@ -387,7 +371,7 @@ int Server_TCP::receive(){
     ssize_t bytes;
     
     // Read message size
-    bytes = recv(clientSock, sizeStream.getBuf(), sizeof(int), 0);
+    bytes = recv(clientSock, sizeStream.getBufHead(), sizeof(int), 0);
     if(bytes != sizeof(int)){
         perror("Unable to read all bytes for message size");
         return 1;
@@ -398,7 +382,7 @@ int Server_TCP::receive(){
     // Done reading message size; Read one byte from scoket
     clearBuf(); // clear buffer
     while (msgSize > 0){
-        bytes = recv(clientSock, getBuf(), msgSize, 0);
+        bytes = recv(clientSock, getBufHead(), msgSize, 0);
         if (bytes <= 0) {
             // recv() was not successful; so stop
             perror("recv() unsuccessful");
@@ -478,7 +462,7 @@ int Client_TCP::send(ByteStream& stream){
     size_t tosend = stream.getWriteIndex() + sizeof(int); // bytes needed to be sent
 
     // Start sending
-    char* head = send.getBuf();
+    char* head = send.getBufHead();
     while (tosend > 0){
         ssize_t bytes = ::send(sockfd, head, tosend, 0);
         if (bytes <= 0) {
@@ -499,7 +483,7 @@ int Client_TCP::receive(){
     ssize_t bytes;
     
     // Read message size
-    bytes = recv(sockfd, sizeStream.getBuf(), sizeof(int), 0);
+    bytes = recv(sockfd, sizeStream.getBufHead(), sizeof(int), 0);
     if(bytes != sizeof(int)){
         perror("Unable to read all bytes for message size");
         return 1;
@@ -510,7 +494,7 @@ int Client_TCP::receive(){
     // Done reading message size; Read one byte from scoket
     clearBuf(); // clear buffer
     while (msgSize > 0){
-        bytes = recv(sockfd, getBuf(), msgSize, 0);
+        bytes = recv(sockfd, getBufHead(), msgSize, 0);
         if (bytes <= 0) {
             // recv() was not successful; so stop
             perror("recv() unsuccessful");
@@ -578,7 +562,7 @@ int Server_UDP::accept(){
 
 int Server_UDP::send(ByteStream& stream){
     socklen_t slen = sizeof(clientAddr);
-    ssize_t sent = sendto(clientSock, stream.getBuf(), stream.getBufSize(), 0, (const sockaddr*)&clientAddr, slen);
+    ssize_t sent = sendto(clientSock, stream.getBufHead(), stream.getBufSize(), 0, (const sockaddr*)&clientAddr, slen);
     if (sent < 0){
         perror("Sending unsuccessful");
         return 1;
@@ -593,7 +577,7 @@ int Server_UDP::receive(){
     socklen_t slen = sizeof(clientAddr);
 
     // Read actual msg
-    bytes = recvfrom(clientSock, getBuf(), getBufSize(), 0, (sockaddr*)&clientAddr, &slen);
+    bytes = recvfrom(clientSock, getBufHead(), getBufSize(), 0, (sockaddr*)&clientAddr, &slen);
     stream.setWriteIndex(getBufSize());
     if(bytes < 0){
         perror("Receiving unsuccessful");
@@ -640,7 +624,7 @@ int Client_UDP::init(const char* host, const int port){
 int Client_UDP::send(ByteStream& stream){
 
     socklen_t slen = sizeof(serverAddr);
-    ssize_t sent = sendto(sockfd, stream.getBuf(), stream.getBufSize(), 0, (const sockaddr*)&serverAddr, slen);
+    ssize_t sent = sendto(sockfd, stream.getBufHead(), stream.getBufSize(), 0, (const sockaddr*)&serverAddr, slen);
     if (sent < 0){
         perror("Sending unsuccessful");
         return 1;
@@ -655,7 +639,7 @@ int Client_UDP::receive(){
     socklen_t slen = sizeof(serverAddr);
 
     // Read actual msg
-    bytes = recvfrom(sockfd, getBuf(), getBufSize(), 0, (sockaddr*)&serverAddr, &slen);
+    bytes = recvfrom(sockfd, getBufHead(), getBufSize(), 0, (sockaddr*)&serverAddr, &slen);
     stream.setWriteIndex(getBufSize());
     if(bytes < 0){
         perror("Receiving unsuccessful");

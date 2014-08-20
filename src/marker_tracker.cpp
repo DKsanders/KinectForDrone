@@ -14,7 +14,7 @@
  *
  * Areas of Improvemnet
  *  - Replace my_matrix functions with proper matrix labraries or tf functions in ROS
- *  - Calibration method (calibrateRPY) could be improved
+ *  - The calibration method, calibrate(), could be improved
  *  - The data from the kinect is precessed in processDataToDrone() on line 224;
  *    If the user wishes to make changes on how to process this data (e.g. replace
  *    the my_matrix functions, use /tf messages instead of ARMarkers, etc), then there
@@ -151,34 +151,6 @@ namespace drone {
         delete markers;
     }
 
-    int DataProcessor::getSeqFromDrone(){
-        return seqFromDrone;
-    }
-
-    Client* DataProcessor::getClient(){
-        return client;
-    }
-
-    Server* DataProcessor::getServer(){
-        return server;
-    }
-
-    ConfigParams* DataProcessor::getClientParams(){
-        return clientParams;
-    }
-
-    ConfigParams* DataProcessor::getServerParams(){
-        return serverParams;
-    }
-
-    SharedData* DataProcessor::getSharedData(){
-        return sharedData;
-    }
-
-    MarkerDataSet* DataProcessor::getMarkerDataSet(){
-        return markers;
-    }
-
     void DataProcessor::setClient(Client* _client){
         client = _client;
     }
@@ -216,7 +188,7 @@ namespace drone {
             if (client->send(stream)) {
                 // Couldn't send
                 ROS_INFO("failed to send to drone");
-            } 
+            }
         }
         seqToDrone += 1;   
     }
@@ -311,7 +283,7 @@ namespace drone {
 
         // Find offset if not done
         if(sampleNum < CALIBRATION_SAMPLE_NUMBER){
-            calibData -> calibrateRPY(h20.roll, h20.pitch, h20.yaw);
+            calibData -> calibrate(h20.matrix[0][3], h20.matrix[1][3], h20.matrix[2][3], h20.roll, h20.pitch, h20.yaw);
             sampleNum += 1;
             return 1;
         }

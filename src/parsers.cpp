@@ -60,11 +60,14 @@ NetworkConfigParser::~NetworkConfigParser(){
 	;
 }
 
-ConfigParams NetworkConfigParser::getConfig(){
-	return data;
-}
-
 int NetworkConfigParser::readConfig(const char* filePath){
+	// Initialize
+	currentLine = 1;
+	data.state = 0;
+	data.host = NULL;
+	data.port = 0;
+	data.type = 0;
+
 	// Check that the file exists
 	ifstream file(filePath);
 	if(!file.is_open()) {
@@ -107,10 +110,8 @@ int NetworkConfigParser::readConfig(const char* filePath){
 	return 0;
 }
 
-int NetworkConfigParser::parseLine(const string& _line){
-	stringstream ss(_line);
-	string line;
-	getline(ss, line);
+int NetworkConfigParser::parseLine(const string& line){
+	int repeatedValue = 0; // flag for repeated config params
 
 	// Check if line should be ignored
 	if(line.empty() || line[0] == COMMENT_CHAR){
@@ -134,31 +135,47 @@ int NetworkConfigParser::parseLine(const string& _line){
 	}
 
 	if(name == "HOST") {
-		string host;
-		status = extractHost(value, host);
-		if(status == 0){
-			data.host = new char[host.length()+1];
-			strcpy(data.host, host.c_str());
+		if(data.host != NULL) {
+			repeatedValue = 1;
+		} else {
+			string host;
+			status = extractHost(value, host);
+			if(status == 0){
+				data.host = new char[host.length()+1];
+				strcpy(data.host, host.c_str());
+			}
 		}
 	} else if (name == "PORT") {
-		int port;
-		status = extractPort(value, port);
-		if(status == 0){
-			data.port = port;
+		if(data.port != 0) {
+			repeatedValue = 1;
+		} else {
+			int port;
+			status = extractPort(value, port);
+			if(status == 0){
+				data.port = port;
+			}
 		}
 	} else if (name == "NETWORK") {
-		int type;
-		status = extractType(value, type);
-		if(status == 0){
-			data.type = type;
+		if(data.type != 0) {
+			repeatedValue = 1;
+		} else {
+			int type;
+			status = extractType(value, type);
+			if(status == 0){
+				data.type = type;
+			}
 		}
 	} else if (name == "STATE") {
-		if(value == "ON" || value == "on" || value == "On" || value == "1"){
-			data.state = ON;
-		} else if (value == "OFF" || value == "off" || value == "Off" || value == "0"){
-			data.state = OFF;
+		if(data.state != 0) {
+			repeatedValue = 1;
 		} else {
-			status = 1;
+			if(value == "ON" || value == "on" || value == "On" || value == "1"){
+				data.state = ON;
+			} else if (value == "OFF" || value == "off" || value == "Off" || value == "0"){
+				data.state = OFF;
+			} else {
+				status = 1;
+			}
 		}
 	} else {
 		status = 1;
@@ -167,6 +184,11 @@ int NetworkConfigParser::parseLine(const string& _line){
 	if(status != 0){
 		// Does not follow expected format
 		cout << "Error on line " << currentLine << ": invalid values" << endl;
+		return 1;
+	}
+	if(repeatedValue != 0){
+		// Does not follow expected format
+		cout << "Error on line " << currentLine << ": repeated configuration parameter" << endl;
 		return 1;
 	}
 	return 0;
@@ -219,6 +241,8 @@ int NetworkConfigParser::extractHost(const string& line, string& host){
 }
 
 int NetworkConfigParser::extractPort(const string& line, int& port) {
+	// Check that the port number has not already been entered
+
 	// Check the port number
 	stringstream ss(line);
 	int temp;
@@ -274,10 +298,6 @@ MarkerDataSet::~MarkerDataSet(){
 	deleteMarkers();
 }
 
-MarkerData MarkerDataSet::getMarker(int id){
-    return *(array[id]);
-}
-
 void MarkerDataSet::deleteMarkers(){
 	// Delete all initialized markers
 	if(array != NULL){
@@ -310,10 +330,6 @@ MarkerFileParser::MarkerFileParser(){
 
 MarkerFileParser::~MarkerFileParser(){
 	;
-}
-
-MarkerDataSet MarkerFileParser::getMarkers(){
-	return data;
 }
 
 int MarkerFileParser::readMarkers(const char* markers){
@@ -353,12 +369,8 @@ int MarkerFileParser::readMarkers(const char* markers){
 	return 0;
 }
 
-int MarkerFileParser::parseLine(const string& _line){
+int MarkerFileParser::parseLine(const string& line){
 	// Check if line should be ignored
-	stringstream ss(_line);
-	string line;
-	getline(ss, line);
-
 	if(line.empty() || line[0] == COMMENT_CHAR){
 		// Parsing a comment or whitespace - ignore
 		return 0;
