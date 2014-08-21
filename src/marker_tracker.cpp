@@ -27,8 +27,6 @@
  *                2        4        1
  */
 
-
-// Libraries
 #include <sstream>
 #include <pthread.h>
 
@@ -56,7 +54,6 @@ int main (int argc, char **argv)
     cin.get();
     return 0;
 }
-
 
 SharedData::SharedData(){
     id = 0;
@@ -198,13 +195,15 @@ namespace drone {
         int markerNum = msg -> markers.size();
 
         // Only work with 4 markers
-        if(markerNum != 4) { return 1; }
+        //if(markerNum != 4) { return 1; }
         
         // Auxilary matrix, h02 when roll/pitch/yaw = 0
         HomogeneousMatrix h02offset; 
-        h02offset.matrix[0][2] = 1;
-        h02offset.matrix[1][0] = 1;
-        h02offset.matrix[2][1] = 1;
+        h02offset.matrix[0][2] = 1; // 0 0 1 0
+        h02offset.matrix[1][0] = 1; // 1 0 0 0
+        h02offset.matrix[2][1] = 1; // 0 1 0 0
+                                    // 0 0 0 1
+
         // Vectors from kinect to markers
         Vector vectors[4];
         // For keeping an average
@@ -214,6 +213,7 @@ namespace drone {
         int i;
         for (i = 0; i < markerNum; i++){
             int markerType = (int) (msg -> markers[i].id); // starts from 0
+
             if(markerType >= markers->num) {
                 ROS_WARN("Unconfigurated marker");
                 return 1;
@@ -241,6 +241,7 @@ namespace drone {
             MarkerData markerData = markers->getMarker(markerType); // marker -> drone
             HomogeneousMatrix h21 = markerData;
             HomogeneousMatrix h20 = h10*h21; // kinect -> drone
+            //h20.print();
             
             // Calculate RPY from marker orientation
             HomogeneousMatrix rpy = h02offset*h20;
@@ -252,8 +253,10 @@ namespace drone {
             }
             avg = avg + rpy;
         }
+
         // Find average
         avg = avg/markerNum;
+        /*
         // Find vectors representing x and y
         Vector vec_x = vectors[0]-vectors[1];
         vec_x.normalize();
@@ -280,18 +283,19 @@ namespace drone {
         }
 
         avg = (avg+h20)/2;
+        */
 
         // Find offset if not done
         if(sampleNum < CALIBRATION_SAMPLE_NUMBER){
-            calibData -> calibrate(h20.matrix[0][3], h20.matrix[1][3], h20.matrix[2][3], h20.roll, h20.pitch, h20.yaw);
+            calibData -> calibrate(avg.matrix[0][3], avg.matrix[1][3], avg.matrix[2][3], avg.roll, avg.pitch, avg.yaw);
             sampleNum += 1;
             return 1;
         }
 
         // Calibrate data
-        h20.calibrate(*calibData);
+        avg.calibrate(*calibData);
 
-        data = h20.toData();
+        data = avg.toData();
         data.setSeq(seqToDrone);
         return 0;
     }
@@ -326,7 +330,7 @@ void* runServer(void* dataProcessor){
 
     // Accept loop
     while(1){
-        status = server->accept();
+        status = server->connect();
         if(status != 0){
             pthread_detach(pthread_self());
             pthread_exit(NULL);
@@ -380,15 +384,16 @@ void* runClient(void* dataProcessor){
         pthread_detach(pthread_self());
         pthread_exit(NULL);
     }
+
+    // Connect with server
+    status = client->connect();
+    if(status != 0){
+        pthread_detach(pthread_self());
+        pthread_exit(NULL);   
+    }
     
     // Call callback functions
     dp->setClient(client);
-
-    /*
-    ros::AsyncSpinner spinner(2);// 2 threads
-    spinner.start();
-    ros::waitForShutdown();
-    */
     ros::spin();
     
     pthread_detach(pthread_self());

@@ -1,6 +1,6 @@
 /**
- * This file (markers.h) provides functions for reading and using 
- * marker data, implemented in markers.cpp
+ * This file (parsers.cpp) provides functions for parsing
+ * configuration files, declared in parsers.h
  *
  * Author: David Sanders <david.sanders@mail.utoronto.ca>
  */

@@ -325,16 +325,16 @@ int Server_TCP::init(const char* host, const int port){
     return 0;
 }
 
-int Server_TCP::accept(){
-
-  socklen_t clientAddrLen = sizeof clientAddr;
-  clientSock = ::accept(listeningSock, (struct sockaddr*)&clientAddr, &clientAddrLen);
-  if (clientSock < 0) {
-    // error accepting connection
-    perror("accept() fail");
-    return 1;
-  }
-  return 0;
+int Server_TCP::connect(){
+    // Accept connection from TCP client
+    socklen_t clientAddrLen = sizeof clientAddr;
+    clientSock = ::accept(listeningSock, (struct sockaddr*)&clientAddr, &clientAddrLen);
+    if (clientSock < 0) {
+        // error accepting connection
+        perror("accept() fail");
+        return 1;
+    }
+    return 0;
 }
 
 
@@ -413,7 +413,7 @@ int Client_TCP::init(const char* host, const int port){
 
     // Declare vriables
     int status;
-    struct addrinfo serverAddr, *res;
+    struct addrinfo serverAddr;
 
     // Create a socket
     sockfd = socket(AF_INET,SOCK_STREAM,0); // PF_INET instead?
@@ -438,9 +438,14 @@ int Client_TCP::init(const char* host, const int port){
         perror("getaddrinfo() unsuccessful");
         return 1;
     }
+    return 0;
+}
 
+int Client_TCP::connect(){
+    // Connect with TCP Server
+    int status = 0;
     do {
-        status = connect(sockfd, res->ai_addr, res->ai_addrlen);
+        status = ::connect(sockfd, res->ai_addr, res->ai_addrlen);
         //cout << res->ai_addr << endl;
         if (status != 0){
             // unable to connect to server
@@ -555,8 +560,8 @@ int Server_UDP::init(const char* host, const int port){
     return 0;
 }
 
-int Server_UDP::accept(){
-    // no accepting
+int Server_UDP::connect(){
+    // No need to establish connection in UDP
     return 0;
 }
 
@@ -618,6 +623,11 @@ int Client_UDP::init(const char* host, const int port){
         perror("Host decoding unsuccessful");
         return 2;
     }
+    return 0;
+}
+
+int Client_UDP::connect() {
+    // No need to establish connection in UDP
     return 0;
 }
 

@@ -578,12 +578,20 @@ HomogeneousMatrix& HomogeneousMatrix::operator=(const RotationMatrix& rhs){
     this->matrix[2][0] = rhs.matrix[2][0];
     this->matrix[2][1] = rhs.matrix[2][1];
     this->matrix[2][2] = rhs.matrix[2][2];
+    matrix[3][0] = 0;
+    matrix[3][1] = 0;
+    matrix[3][2] = 0;
+    matrix[3][3] = 1;
     return *this;
 }
 
 HomogeneousMatrix& HomogeneousMatrix::operator=(const Quaternion& quat){
     RotationMatrix rm = quat;
     *this = rm;
+    matrix[3][0] = 0;
+    matrix[3][1] = 0;
+    matrix[3][2] = 0;
+    matrix[3][3] = 1;
     return *this;
 }
 
@@ -600,6 +608,10 @@ HomogeneousMatrix& HomogeneousMatrix::operator=(const MarkerData& rhs){
     this->matrix[0][3] = rhs.dist_x;
     this->matrix[1][3] = rhs.dist_y;
     this->matrix[2][3] = rhs.dist_z;
+    this->matrix[3][0] = 0;
+    this->matrix[3][1] = 0;
+    this->matrix[3][2] = 0;
+    this->matrix[3][3] = 1;
     return *this;
 }
 

@@ -1,5 +1,5 @@
 /**
- * This file (network.h) provides the skeleton structures for
+ * This file (network.h) provides structures for
  * implementing servers and clients.
  *
  * Functions for reading and writing from/to byte streams are
@@ -102,7 +102,7 @@ public:
     virtual int init(const char* host, const int port) = 0;
     
     // For accepting connectinos
-    virtual int accept() = 0;
+    virtual int connect() = 0;
     
     // Sending
     int send(const string& msg) { return send(msg.c_str()); };
@@ -172,6 +172,9 @@ public:
     // Initializers
     int init(string& host, const int port) {return init(host.c_str(), port);};
     virtual int init(const char* host, const int port) = 0;
+
+    // For getting accepted
+    virtual int connect() = 0;
     
     // Sending
     int send(const string& msg) { return send(msg.c_str()); };
@@ -229,7 +232,7 @@ public:
     virtual ~Server_TCP();
 
     virtual int init(const char* host, const int port);
-    virtual int accept();
+    virtual int connect();
     virtual int send(ByteStream& stream);
     virtual int receive();
 
@@ -244,8 +247,12 @@ public:
     virtual ~Client_TCP();
     
     virtual int init(const char* host, const int port);
+    virtual int connect();
     virtual int send(ByteStream& stream);
     virtual int receive();
+
+private:
+    struct addrinfo *res;
     
 };
 
@@ -258,7 +265,7 @@ public:
     virtual ~Server_UDP();
 
     virtual int init(const char* host, const int port);
-    virtual int accept();
+    virtual int connect();
     virtual int send(ByteStream& stream);
     virtual int receive();
     
@@ -275,6 +282,7 @@ public:
     virtual ~Client_UDP();
     
     virtual int init(const char* host, const int port);
+    virtual int connect();
     virtual int send(ByteStream& stream);
     virtual int receive();
     
