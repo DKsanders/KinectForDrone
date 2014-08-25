@@ -13,25 +13,25 @@
 
 using namespace std;
 
-Vector::Vector(){
+Vector::Vector() {
     size = 3;
     vector = new double[size];
     int i;
-    for(i=0; i<size; i++){
+    for(i=0; i<size; i++) {
         vector[i] = 0;
     }
 }
 
-Vector::Vector(int _size){
+Vector::Vector(int _size) {
     size = _size;
     vector = new double[size];
     int i;
-    for(i=0; i<size; i++){
+    for(i=0; i<size; i++) {
         vector[i] = 0;
     }
 }
 
-Vector::Vector(const MarkerData& data){
+Vector::Vector(const MarkerData& data) {
     size = 3;
     vector = new double[size];
     this->vector[0] = data.dist_x;
@@ -39,29 +39,29 @@ Vector::Vector(const MarkerData& data){
     this->vector[2] = data.dist_z;
 }
 
-Vector::Vector(const Vector& other){
+Vector::Vector(const Vector& other) {
     size = other.size;
     vector = new double[size];
     int i;
-    for(i=0; i<size; i++){
+    for(i=0; i<size; i++) {
         vector[i] = other.vector[i];
     }
 }
 
-Vector::~Vector(){
+Vector::~Vector() {
     delete [] vector;
 }
 
-double Vector::getNorm(){
+double Vector::getNorm() {
     int i;
     double sum = 0;
-    for(i=0; i<size; i++){
+    for(i=0; i<size; i++) {
         sum += (vector[i]*vector[i]);
     }
     return sqrt(sum);
 }
 
-void Vector::normalize(){
+void Vector::normalize() {
     double norm = getNorm();
     int i;
     for(i=0; i<size; i++) {
@@ -69,29 +69,29 @@ void Vector::normalize(){
     }
 }
 
-void Vector::print(){
+void Vector::print() {
     int i;
     cout << "Vector:" << endl;
-    for (i=0; i<size; i++){
+    for (i=0; i<size; i++) {
         cout << "  " << vector[i] << endl;
     }
 }
 
-Vector& Vector::operator=(const Vector& rhs){
+Vector& Vector::operator=(const Vector& rhs) {
     delete [] this->vector;
     this->size = rhs.size;
     this->vector = new double[size];
     int i;
-    for(i=0; i<size; i++){
+    for(i=0; i<size; i++) {
         this->vector[i] = rhs.vector[i];
     }
     return *this;
 }
 
-Vector Vector::operator*(const Vector& rhs){
+Vector Vector::operator*(const Vector& rhs) {
     Vector rtn(3);
     // Check that both are size 3
-    if(this->size != 3 || rhs.size != 3){
+    if(this->size != 3 || rhs.size != 3) {
         return rtn;
     }
     rtn.vector[0] = this->vector[1]*rhs.vector[2] - this->vector[2]*rhs.vector[1];
@@ -100,27 +100,27 @@ Vector Vector::operator*(const Vector& rhs){
     return rtn;
 }
 
-Vector Vector::operator+(const Vector& rhs){
+Vector Vector::operator+(const Vector& rhs) {
     Vector rtn;
     // Check that both are size 3
-    if(this->size != rhs.size){
+    if(this->size != rhs.size) {
         return rtn;
     }
     int i;
-    for(i=0; i<size; i++){
+    for(i=0; i<size; i++) {
         rtn.vector[i] = this->vector[i] + rhs.vector[i];
     }
     return rtn;
 }
 
-Vector Vector::operator-(const Vector& rhs){
+Vector Vector::operator-(const Vector& rhs) {
     Vector rtn;
     // Check that both are same size
-    if(this->size != rhs.size){
+    if(this->size != rhs.size) {
         return rtn;
     }
     int i;
-    for(i=0; i<size; i++){
+    for(i=0; i<size; i++) {
         rtn.vector[i] = this->vector[i] - rhs.vector[i];
     }
     return rtn;
@@ -129,7 +129,7 @@ Vector Vector::operator-(const Vector& rhs){
 Vector Vector::operator*(double rhs) {
     Vector rtn;
     int i;
-    for(i=0; i<size; i++){
+    for(i=0; i<size; i++) {
         rtn.vector[i] = this->vector[i] * rhs;
     }
     return rtn;
@@ -138,7 +138,7 @@ Vector Vector::operator*(double rhs) {
 Vector Vector::operator/(double rhs) {
     Vector rtn;
     int i;
-    for(i=0; i<size; i++){
+    for(i=0; i<size; i++) {
         rtn.vector[i] = this->vector[i] / rhs;
     }
     return rtn;
@@ -147,7 +147,7 @@ Vector Vector::operator/(double rhs) {
 Vector Vector::operator+(double rhs) {
     Vector rtn;
     int i;
-    for(i=0; i<size; i++){
+    for(i=0; i<size; i++) {
         rtn.vector[i] = this->vector[i] + rhs;
     }
     return rtn;
@@ -156,24 +156,23 @@ Vector Vector::operator+(double rhs) {
 Vector Vector::operator-(double rhs) {
     Vector rtn;
     int i;
-    for(i=0; i<size; i++){
+    for(i=0; i<size; i++) {
         rtn.vector[i] = this->vector[i] - rhs;
     }
     return rtn;
 }
 
-Vector& Vector::operator=(const MarkerData& rhs){
+void Vector::fromMarkerData(const MarkerData& rhs) {
     delete [] this->vector;
     this->size = 3;
     this->vector = new double[size];
     this->vector[0] = rhs.dist_x;
     this->vector[1] = rhs.dist_y;
     this->vector[2] = rhs.dist_z;
-
-    return *this;
 }
 
-void Quaternion::print(){
+
+void Quaternion::print() {
     cout << "---------------------------------------------------------------------"<< endl;
     cout << "Quaternion: " << endl;
     cout << "  w: " << w << endl;
@@ -182,7 +181,7 @@ void Quaternion::print(){
     cout << "  z: " << z << endl;
 }
 
-RotationMatrix::RotationMatrix(){
+RotationMatrix::RotationMatrix() {
     matrix[0][0] = 0;
     matrix[0][1] = 0;
     matrix[0][2] = 0;
@@ -194,7 +193,7 @@ RotationMatrix::RotationMatrix(){
     matrix[2][2] = 0;
 }
 
-RotationMatrix::RotationMatrix(const Quaternion& quat){
+RotationMatrix::RotationMatrix(const Quaternion& quat) {
     // Convert
     double z = sqrt(quat.w * quat.w + quat.x * quat.x + quat.y * quat.y + quat.z * quat.z);
     double a = quat.w/z;
@@ -213,21 +212,21 @@ RotationMatrix::RotationMatrix(const Quaternion& quat){
     matrix[2][2] = a*a - b*b - c*c + d*d;
 }
 
-RotationMatrix::RotationMatrix(const MarkerData& rhs){
+RotationMatrix::RotationMatrix(const MarkerData& rhs) {
     *this = rhs;
 }
 
-RotationMatrix::~RotationMatrix(){
+RotationMatrix::~RotationMatrix() {
     ;
 }
 
-double RotationMatrix::getDeterminant(){
+double RotationMatrix::getDeterminant() {
     return matrix[0][0]* (matrix[1][1]*matrix[2][2] - matrix[2][1]*matrix[1][2])
            - matrix[0][1]* (matrix[1][0]*matrix[2][2] - matrix[2][0]*matrix[1][2])
            + matrix[0][2]* (matrix[1][0]*matrix[2][1] - matrix[2][0]*matrix[1][1]);
 }
 
-void RotationMatrix::transpose(){
+void RotationMatrix::transpose() {
     double temp = matrix[0][1];
     matrix[0][1] = matrix[1][0];
     matrix[1][0] = temp;
@@ -239,23 +238,23 @@ void RotationMatrix::transpose(){
     matrix[2][1] = temp;
 }
 
-RotationMatrix RotationMatrix::getTranspose(){
+RotationMatrix RotationMatrix::getTranspose() {
     RotationMatrix temp = *this;
     temp.transpose();
     return temp;
 }
 
-void RotationMatrix::invert(){
+void RotationMatrix::invert() {
     this->transpose();
 }
 
-RotationMatrix RotationMatrix::getInverse(){
+RotationMatrix RotationMatrix::getInverse() {
     RotationMatrix temp = *this;
     temp.invert();
     return temp;
 }
 
-void RotationMatrix::print(){
+void RotationMatrix::print() {
     cout << "---------------------------------------------------------------------"<< endl;
     cout << "Rotation Matrix: "  << endl;
     cout << "  " << this->matrix[0][0]  << "  " << this->matrix[0][1]  << "  " << this->matrix[0][2] << endl;
@@ -263,31 +262,31 @@ void RotationMatrix::print(){
     cout << "  " << this->matrix[2][0]  << "  " << this->matrix[2][1]  << "  " << this->matrix[2][2] << endl;
 }
 
-RotationMatrix RotationMatrix::operator+(const RotationMatrix& rhs){
+RotationMatrix RotationMatrix::operator+(const RotationMatrix& rhs) {
     RotationMatrix rtn;
     int SIZE = 3;
     int i,j;
-    for(i=0; i<SIZE; i++){
-        for(j=0; j<SIZE; j++){
+    for(i=0; i<SIZE; i++) {
+        for(j=0; j<SIZE; j++) {
             rtn.matrix[i][j] = this->matrix[i][j] + rhs.matrix[i][j];
         }
     }
     return rtn;
 }
 
-RotationMatrix RotationMatrix::operator-(const RotationMatrix& rhs){
+RotationMatrix RotationMatrix::operator-(const RotationMatrix& rhs) {
     RotationMatrix rtn;
     int SIZE = 3;
     int i,j;
-    for(i=0; i<SIZE; i++){
-        for(j=0; j<SIZE; j++){
+    for(i=0; i<SIZE; i++) {
+        for(j=0; j<SIZE; j++) {
             rtn.matrix[i][j] = this->matrix[i][j] - rhs.matrix[i][j];
         }
     }
     return rtn;
 }
 
-RotationMatrix RotationMatrix::operator*(const RotationMatrix& rhs){
+RotationMatrix RotationMatrix::operator*(const RotationMatrix& rhs) {
     RotationMatrix rtn;
     double sum;
     int i,j,k;
@@ -304,55 +303,55 @@ RotationMatrix RotationMatrix::operator*(const RotationMatrix& rhs){
     return rtn;
 }
 
-RotationMatrix RotationMatrix::operator+(const double rhs){
+RotationMatrix RotationMatrix::operator+(const double rhs) {
     RotationMatrix rtn;
     int SIZE = 3;
     int i,j;
-    for(i=0; i<SIZE; i++){
-        for(j=0; j<SIZE; j++){
+    for(i=0; i<SIZE; i++) {
+        for(j=0; j<SIZE; j++) {
             rtn.matrix[i][j] = this->matrix[i][j] + rhs;
         }
     }
     return rtn;
 }
 
-RotationMatrix RotationMatrix::operator-(const double rhs){
+RotationMatrix RotationMatrix::operator-(const double rhs) {
     RotationMatrix rtn;
     int SIZE = 3;
     int i,j;
-    for(i=0; i<SIZE; i++){
-        for(j=0; j<SIZE; j++){
+    for(i=0; i<SIZE; i++) {
+        for(j=0; j<SIZE; j++) {
             rtn.matrix[i][j] = this->matrix[i][j] - rhs;
         }
     }
     return rtn;
 }
 
-RotationMatrix RotationMatrix::operator*(const double rhs){
+RotationMatrix RotationMatrix::operator*(const double rhs) {
     RotationMatrix rtn;
     int SIZE = 3;
     int i,j;
-    for(i=0; i<SIZE; i++){
-        for(j=0; j<SIZE; j++){
+    for(i=0; i<SIZE; i++) {
+        for(j=0; j<SIZE; j++) {
             rtn.matrix[i][j] = this->matrix[i][j] * rhs;
         }
     }
     return rtn;
 }
 
-RotationMatrix RotationMatrix::operator/(const double rhs){
+RotationMatrix RotationMatrix::operator/(const double rhs) {
     RotationMatrix rtn;
     int SIZE = 3;
     int i,j;
-    for(i=0; i<SIZE; i++){
-        for(j=0; j<SIZE; j++){
+    for(i=0; i<SIZE; i++) {
+        for(j=0; j<SIZE; j++) {
             rtn.matrix[i][j] = this->matrix[i][j] / rhs;
         }
     }
     return rtn;
 }
 
-RotationMatrix& RotationMatrix::operator=(const Quaternion& quat){
+RotationMatrix& RotationMatrix::operator=(const Quaternion& quat) {
      // Convert
     double z = sqrt(quat.w * quat.w + quat.x * quat.x + quat.y * quat.y + quat.z * quat.z);
     double a = quat.w/z;
@@ -373,7 +372,7 @@ RotationMatrix& RotationMatrix::operator=(const Quaternion& quat){
     return *this;
 }
 
-RotationMatrix& RotationMatrix::operator=(const MarkerData& rhs){
+RotationMatrix& RotationMatrix::operator=(const MarkerData& rhs) {
     this->matrix[0][0] = rhs.rm[0][0];
     this->matrix[0][1] = rhs.rm[0][1];
     this->matrix[0][2] = rhs.rm[0][2];
@@ -386,7 +385,7 @@ RotationMatrix& RotationMatrix::operator=(const MarkerData& rhs){
     return *this;
 }
 
-HomogeneousMatrix::HomogeneousMatrix(){
+HomogeneousMatrix::HomogeneousMatrix() {
     matrix[0][0] = 0;
     matrix[0][1] = 0;
     matrix[0][2] = 0;
@@ -400,30 +399,45 @@ HomogeneousMatrix::HomogeneousMatrix(){
     matrix[3][1] = 0;
     matrix[3][2] = 0;
     matrix[3][3] = 1;
+    roll = 0;
+    pitch = 0;
+    yaw = 0;
 }
 
-HomogeneousMatrix::HomogeneousMatrix(const Quaternion& quat){
+HomogeneousMatrix::HomogeneousMatrix(const Quaternion& quat) {
     *this = quat;
 }
 
-HomogeneousMatrix::HomogeneousMatrix(const RotationMatrix& rhs){
+HomogeneousMatrix::HomogeneousMatrix(const RotationMatrix& rhs) {
     *this = rhs;
 }
 
-HomogeneousMatrix::HomogeneousMatrix(const MarkerData& rhs){
-    *this = rhs;
+HomogeneousMatrix::HomogeneousMatrix(const MarkerData& rhs) {
+    this->fromMarkerData(rhs);
 }
 
-HomogeneousMatrix::~HomogeneousMatrix(){
+HomogeneousMatrix::~HomogeneousMatrix() {
     ;
 }
 
-double HomogeneousMatrix::getDeterminant(){
+void HomogeneousMatrix::setRoll(double _roll) {
+    roll = _roll;
+}
+
+void HomogeneousMatrix::setPitch(double _pitch) {
+    pitch = _pitch;
+}
+
+void HomogeneousMatrix::setYaw(double _yaw) {
+    yaw = _yaw;
+}
+
+double HomogeneousMatrix::getDeterminant() {
     return matrix[0][0]* (matrix[1][1]*matrix[2][2] - matrix[2][1]*matrix[1][2])
            - matrix[0][1]* (matrix[1][0]*matrix[2][2] - matrix[2][0]*matrix[1][2])
            + matrix[0][2]* (matrix[1][0]*matrix[2][1] - matrix[2][0]*matrix[1][1]);
 }
-void HomogeneousMatrix::transpose(){
+void HomogeneousMatrix::transpose() {
     double temp = matrix[0][1];
     matrix[0][1] = matrix[1][0];
     matrix[1][0] = temp;
@@ -442,23 +456,23 @@ void HomogeneousMatrix::transpose(){
     matrix[2][3] = 0;
 }
 
-HomogeneousMatrix HomogeneousMatrix::getTranspose(){
+HomogeneousMatrix HomogeneousMatrix::getTranspose() {
     HomogeneousMatrix temp = *this;
     temp.transpose();
     return temp;
 }
 
-void HomogeneousMatrix::invert(){
+void HomogeneousMatrix::invert() {
     ;
 }
 
-HomogeneousMatrix HomogeneousMatrix::getInverse(){
+HomogeneousMatrix HomogeneousMatrix::getInverse() {
     HomogeneousMatrix temp = *this;
     temp.invert();
     return temp;
 }
 
-void HomogeneousMatrix::print(){
+void HomogeneousMatrix::print() {
     cout << "---------------------------------------------------------------------"<< endl;
     cout << "Homogeneous Matrix: "  << endl;
     cout << "  " << this->matrix[0][0]  << "  " << this->matrix[0][1]  << "  " << this->matrix[0][2] << "  " << this->matrix[0][3] << endl;
@@ -470,7 +484,17 @@ void HomogeneousMatrix::print(){
     cout << "Yaw: "  << yaw*180/3.14159265358979323846 << endl;
 }
 
-void HomogeneousMatrix::calibrate(CalibrationData calib){
+void HomogeneousMatrix::calc_rpy() {
+    if(matrix[2][0] == 1 || matrix[2][0] == -1 ) {
+        // Singularity in the homogeneous matrix - unable to calculate roll/pitch/yaw
+        return;
+    }
+    roll = atan2(matrix[2][1], matrix[2][2]);//*180/3.1415926535897;
+    pitch = atan2(-1*matrix[2][0], sqrt(matrix[1][0]*matrix[1][0]+matrix[0][0]*matrix[0][0]));//*180/3.1415926535897;
+    yaw = atan2(matrix[1][0], matrix[0][0]);//*180/3.1415926535897;
+}
+
+void HomogeneousMatrix::calibrate(CalibrationData calib) {
     roll = roll - calib.getRoll();
     pitch = pitch - calib.getPitch();
     yaw = yaw - calib.getYaw();
@@ -479,143 +503,7 @@ void HomogeneousMatrix::calibrate(CalibrationData calib){
     matrix[2][3] = matrix[2][3] - calib.getZ();
 }
 
-HomogeneousMatrix HomogeneousMatrix::operator+(const HomogeneousMatrix& rhs){
-    HomogeneousMatrix rtn;
-    int SIZE = 4;
-    int i,j;
-    for(i=0; i<SIZE; i++){
-        for(j=0; j<SIZE; j++){
-            rtn.matrix[i][j] = this->matrix[i][j] + rhs.matrix[i][j];
-        }
-    }
-    return rtn;
-}
-
-HomogeneousMatrix HomogeneousMatrix::operator-(const HomogeneousMatrix& rhs){
-    HomogeneousMatrix rtn;
-    int SIZE = 4;
-    int i,j;
-    for(i=0; i<SIZE; i++){
-        for(j=0; j<SIZE; j++){
-            rtn.matrix[i][j] = this->matrix[i][j] - rhs.matrix[i][j];
-        }
-    }
-    return rtn;
-}
-
-HomogeneousMatrix HomogeneousMatrix::operator*(const HomogeneousMatrix& rhs){
-    HomogeneousMatrix rtn;
-    double sum;
-    int i,j,k;
-    int SIZE = 4;
-    for ( i = 0 ; i < SIZE ; i++) {
-      for ( j = 0 ; j < SIZE ; j++) {
-        sum = 0;
-        for ( k = 0 ; k < SIZE ; k++) {
-          sum += this->matrix[i][k] * rhs.matrix[k][j];
-        }
-        rtn.matrix[i][j] = sum;
-      }
-    }
-    return rtn;
-}
-
-HomogeneousMatrix HomogeneousMatrix::operator+(const double rhs){
-    HomogeneousMatrix rtn;
-    int SIZE = 4;
-    int i,j;
-    for(i=0; i<SIZE; i++){
-        for(j=0; j<SIZE; j++){
-            rtn.matrix[i][j] = this->matrix[i][j] + rhs;
-        }
-    }
-    return rtn;
-}
-
-HomogeneousMatrix HomogeneousMatrix::operator-(const double rhs){
-    HomogeneousMatrix rtn;
-    int SIZE = 4;
-    int i,j;
-    for(i=0; i<SIZE; i++){
-        for(j=0; j<SIZE; j++){
-            rtn.matrix[i][j] = this->matrix[i][j] - rhs;
-        }
-    }
-    return rtn;
-}
-
-HomogeneousMatrix HomogeneousMatrix::operator*(const double rhs){
-    HomogeneousMatrix rtn;
-    int SIZE = 4;
-    int i,j;
-    for(i=0; i<SIZE; i++){
-        for(j=0; j<SIZE; j++){
-            rtn.matrix[i][j] = this->matrix[i][j] * rhs;
-        }
-    }
-    return rtn;
-}
-
-HomogeneousMatrix HomogeneousMatrix::operator/(const double rhs){
-    HomogeneousMatrix rtn;
-    int SIZE = 4;
-    int i,j;
-    for(i=0; i<SIZE; i++){
-        for(j=0; j<SIZE; j++){
-            rtn.matrix[i][j] = this->matrix[i][j] / rhs;
-        }
-    }
-    return rtn;
-}
-
-HomogeneousMatrix& HomogeneousMatrix::operator=(const RotationMatrix& rhs){
-    this->matrix[0][0] = rhs.matrix[0][0];
-    this->matrix[0][1] = rhs.matrix[0][1];
-    this->matrix[0][2] = rhs.matrix[0][2];
-    this->matrix[1][0] = rhs.matrix[1][0];
-    this->matrix[1][1] = rhs.matrix[1][1];
-    this->matrix[1][2] = rhs.matrix[1][2];
-    this->matrix[2][0] = rhs.matrix[2][0];
-    this->matrix[2][1] = rhs.matrix[2][1];
-    this->matrix[2][2] = rhs.matrix[2][2];
-    matrix[3][0] = 0;
-    matrix[3][1] = 0;
-    matrix[3][2] = 0;
-    matrix[3][3] = 1;
-    return *this;
-}
-
-HomogeneousMatrix& HomogeneousMatrix::operator=(const Quaternion& quat){
-    RotationMatrix rm = quat;
-    *this = rm;
-    matrix[3][0] = 0;
-    matrix[3][1] = 0;
-    matrix[3][2] = 0;
-    matrix[3][3] = 1;
-    return *this;
-}
-
-HomogeneousMatrix& HomogeneousMatrix::operator=(const MarkerData& rhs){
-    this->matrix[0][0] = rhs.rm[0][0];
-    this->matrix[0][1] = rhs.rm[0][1];
-    this->matrix[0][2] = rhs.rm[0][2];
-    this->matrix[1][0] = rhs.rm[1][0];
-    this->matrix[1][1] = rhs.rm[1][1];
-    this->matrix[1][2] = rhs.rm[1][2];
-    this->matrix[2][0] = rhs.rm[2][0];
-    this->matrix[2][1] = rhs.rm[2][1];
-    this->matrix[2][2] = rhs.rm[2][2];
-    this->matrix[0][3] = rhs.dist_x;
-    this->matrix[1][3] = rhs.dist_y;
-    this->matrix[2][3] = rhs.dist_z;
-    this->matrix[3][0] = 0;
-    this->matrix[3][1] = 0;
-    this->matrix[3][2] = 0;
-    this->matrix[3][3] = 1;
-    return *this;
-}
-
-DroneData HomogeneousMatrix::toData(){
+DroneData HomogeneousMatrix::toDroneData() {
     DroneData rtn;
     /*
     rtn.rm[0][0] = this->matrix[0][0];
@@ -638,8 +526,157 @@ DroneData HomogeneousMatrix::toData(){
     return rtn;
 }
 
-void HomogeneousMatrix::hm2rpy(){
-    roll = atan2(matrix[2][1], matrix[2][2]);//*180/3.1415926535897;
-    pitch = atan2(-1*matrix[2][0], sqrt(matrix[1][0]*matrix[1][0]+matrix[0][0]*matrix[0][0]));//*180/3.1415926535897;
-    yaw = atan2(matrix[1][0], matrix[0][0]);//*180/3.1415926535897;
+void HomogeneousMatrix::fromMarkerData(const MarkerData& rhs) {
+    this->matrix[0][0] = rhs.rm[0][0];
+    this->matrix[0][1] = rhs.rm[0][1];
+    this->matrix[0][2] = rhs.rm[0][2];
+    this->matrix[1][0] = rhs.rm[1][0];
+    this->matrix[1][1] = rhs.rm[1][1];
+    this->matrix[1][2] = rhs.rm[1][2];
+    this->matrix[2][0] = rhs.rm[2][0];
+    this->matrix[2][1] = rhs.rm[2][1];
+    this->matrix[2][2] = rhs.rm[2][2];
+    this->matrix[0][3] = rhs.dist_x;
+    this->matrix[1][3] = rhs.dist_y;
+    this->matrix[2][3] = rhs.dist_z;
+    this->matrix[3][0] = 0;
+    this->matrix[3][1] = 0;
+    this->matrix[3][2] = 0;
+    this->matrix[3][3] = 1;
+}
+
+HomogeneousMatrix HomogeneousMatrix::operator+(const HomogeneousMatrix& rhs) {
+    HomogeneousMatrix rtn;
+    int SIZE = 4;
+    int i,j;
+    for(i=0; i<SIZE; i++) {
+        for(j=0; j<SIZE; j++) {
+            rtn.matrix[i][j] = this->matrix[i][j] + rhs.matrix[i][j];
+        }
+    }
+    rtn.roll = roll + rhs.roll;
+    rtn.pitch = pitch + rhs.pitch;
+    rtn.yaw = yaw + rhs.yaw;
+    return rtn;
+}
+
+HomogeneousMatrix HomogeneousMatrix::operator-(const HomogeneousMatrix& rhs) {
+    HomogeneousMatrix rtn;
+    int SIZE = 4;
+    int i,j;
+    for(i=0; i<SIZE; i++) {
+        for(j=0; j<SIZE; j++) {
+            rtn.matrix[i][j] = this->matrix[i][j] - rhs.matrix[i][j];
+        }
+    }
+    rtn.roll = roll - rhs.roll;
+    rtn.pitch = pitch - rhs.pitch;
+    rtn.yaw = yaw - rhs.yaw;
+    return rtn;
+}
+
+HomogeneousMatrix HomogeneousMatrix::operator*(const HomogeneousMatrix& rhs) {
+    HomogeneousMatrix rtn;
+    double sum;
+    int i,j,k;
+    int SIZE = 4;
+    for ( i = 0 ; i < SIZE ; i++) {
+      for ( j = 0 ; j < SIZE ; j++) {
+        sum = 0;
+        for ( k = 0 ; k < SIZE ; k++) {
+          sum += this->matrix[i][k] * rhs.matrix[k][j];
+        }
+        rtn.matrix[i][j] = sum;
+      }
+    }
+    rtn.calc_rpy();
+    return rtn;
+}
+
+HomogeneousMatrix HomogeneousMatrix::operator+(const double rhs) {
+    HomogeneousMatrix rtn;
+    int SIZE = 4;
+    int i,j;
+    for(i=0; i<SIZE; i++) {
+        for(j=0; j<SIZE; j++) {
+            rtn.matrix[i][j] = this->matrix[i][j] + rhs;
+        }
+    }
+    rtn.roll = roll + rhs;
+    rtn.pitch = pitch + rhs;
+    rtn.yaw = yaw + rhs;
+    return rtn;
+}
+
+HomogeneousMatrix HomogeneousMatrix::operator-(const double rhs) {
+    HomogeneousMatrix rtn;
+    int SIZE = 4;
+    int i,j;
+    for(i=0; i<SIZE; i++) {
+        for(j=0; j<SIZE; j++) {
+            rtn.matrix[i][j] = this->matrix[i][j] - rhs;
+        }
+    }
+    rtn.roll = roll - rhs;
+    rtn.pitch = pitch - rhs;
+    rtn.yaw = yaw - rhs;
+    return rtn;
+}
+
+HomogeneousMatrix HomogeneousMatrix::operator*(const double rhs) {
+    HomogeneousMatrix rtn;
+    int SIZE = 4;
+    int i,j;
+    for(i=0; i<SIZE; i++) {
+        for(j=0; j<SIZE; j++) {
+            rtn.matrix[i][j] = this->matrix[i][j] * rhs;
+        }
+    }
+    rtn.roll = roll * rhs;
+    rtn.pitch = pitch * rhs;
+    rtn.yaw = yaw * rhs;
+    return rtn;
+}
+
+HomogeneousMatrix HomogeneousMatrix::operator/(const double rhs) {
+    HomogeneousMatrix rtn;
+    int SIZE = 4;
+    int i,j;
+    for(i=0; i<SIZE; i++) {
+        for(j=0; j<SIZE; j++) {
+            rtn.matrix[i][j] = this->matrix[i][j] / rhs;
+        }
+    }
+    rtn.roll = roll / rhs;
+    rtn.pitch = pitch / rhs;
+    rtn.yaw = yaw / rhs;
+    return rtn;
+}
+
+HomogeneousMatrix& HomogeneousMatrix::operator=(const RotationMatrix& rhs) {
+    this->matrix[0][0] = rhs.matrix[0][0];
+    this->matrix[0][1] = rhs.matrix[0][1];
+    this->matrix[0][2] = rhs.matrix[0][2];
+    this->matrix[1][0] = rhs.matrix[1][0];
+    this->matrix[1][1] = rhs.matrix[1][1];
+    this->matrix[1][2] = rhs.matrix[1][2];
+    this->matrix[2][0] = rhs.matrix[2][0];
+    this->matrix[2][1] = rhs.matrix[2][1];
+    this->matrix[2][2] = rhs.matrix[2][2];
+    matrix[3][0] = 0;
+    matrix[3][1] = 0;
+    matrix[3][2] = 0;
+    matrix[3][3] = 1;
+    this->calc_rpy();
+    return *this;
+}
+
+HomogeneousMatrix& HomogeneousMatrix::operator=(const Quaternion& quat ) {
+    RotationMatrix rm = quat;
+    *this = rm;
+    matrix[3][0] = 0;
+    matrix[3][1] = 0;
+    matrix[3][2] = 0;
+    matrix[3][3] = 1;
+    return *this;
 }

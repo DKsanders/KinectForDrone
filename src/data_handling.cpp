@@ -11,7 +11,7 @@
 
 using namespace std;
 
-CalibrationData::CalibrationData(){
+CalibrationData::CalibrationData() {
   xOffset = 0;
   yOffset = 0;
   zOffset = 0;
@@ -23,11 +23,11 @@ CalibrationData::CalibrationData(){
   sampleNum = 0;
 }
 
-CalibrationData::~CalibrationData(){
+CalibrationData::~CalibrationData() {
     ;
 }
 
-void CalibrationData::calibrate(double x, double y, double z, double roll, double pitch, double yaw){
+void CalibrationData::calibrate(double x, double y, double z, double roll, double pitch, double yaw) {
     // Calibrate using running average
     double xTotal = sampleNum * xOffset + x;
     double yTotal = sampleNum * yOffset + y;
@@ -44,7 +44,7 @@ void CalibrationData::calibrate(double x, double y, double z, double roll, doubl
     pitchOffset = pitchTotal / sampleNum;
     yawOffset = yawTotal / sampleNum;
 
-    if(sampleNum == 10){
+    if(sampleNum == 10) {
         cout << "Done calibrating. The offsets are:" << endl;
         cout << "  dist_x: " << xOffset << endl;
         cout << "  dist_y: " << yOffset << endl;
@@ -55,11 +55,11 @@ void CalibrationData::calibrate(double x, double y, double z, double roll, doubl
     }
 }
 
-DroneData::DroneData(){
+DroneData::DroneData() {
     comment = "";
 }
 
-DroneData::DroneData(ByteStream& stream){
+DroneData::DroneData(ByteStream& stream) {
     deserialize(stream);
 }
 
@@ -131,7 +131,7 @@ void DroneData::deserialize(ByteStream& stream) {
     return;
 }
 
-void DroneData::print(){
+void DroneData::print() {
     
     cout << "---------------------------------------------------------------------"<< endl;
     cout << "Sequence Number: " << endl;
@@ -156,5 +156,5 @@ void DroneData::print(){
     return;
 }
 
-DroneData* deserialize(const char* msg){
+DroneData* deserialize(const char* msg) {
 }

@@ -57,19 +57,19 @@ ByteStream::ByteStream(int _bufSize, const char* data, int dataSize) {
 	memcpy(buf, data, dataSize);
 }
 
-ByteStream::~ByteStream(){
+ByteStream::~ByteStream() {
 	delete [] buf;
 }
 
-void ByteStream::setWriteIndex(int _writeIndex){
+void ByteStream::setWriteIndex(int _writeIndex) {
 	writeIndex = _writeIndex;
 }
 
-void ByteStream::setReadIndex(int _readIndex){
+void ByteStream::setReadIndex(int _readIndex) {
 	readIndex = _readIndex;
 }
 
-void ByteStream::setBufSize(int _bufSize){
+void ByteStream::setBufSize(int _bufSize) {
 	delete [] buf;
 	bufSize = _bufSize;
 	buf = new char[bufSize];
@@ -81,11 +81,11 @@ void ByteStream::setBufSize(int _bufSize){
 int ByteStream::write(int data) {
 	// Check size (should be 4 bytes)
 	int size = sizeof(int);
-	if((writeIndex + size) > bufSize){
+	if((writeIndex + size) > bufSize) {
 		// Not enough room in buffer
 		return 0;
 	}
-	if(size == 4){
+	if(size == 4) {
 		// As expected
 		uint32_t bytes = htole32(*(uint32_t*)(&data));
 		memcpy(buf+writeIndex, &bytes, size);
@@ -100,11 +100,11 @@ int ByteStream::write(int data) {
 int ByteStream::write(float data) {
 	// Check size (should be 4 bytes)
 	int size = sizeof(float);
-	if((writeIndex + size) > bufSize){
+	if((writeIndex + size) > bufSize) {
 		// Not enough room in buffer
 		return 0;
 	}
-	if(size == 4){
+	if(size == 4) {
 		// As expected
 		uint32_t bytes = htole32(*(uint32_t*)(&data));
 		memcpy(buf+writeIndex, &bytes, size);
@@ -119,11 +119,11 @@ int ByteStream::write(float data) {
 int ByteStream::write(double data) {
 	// Check size (should be 8 bytes)
 	int size = sizeof(double);
-	if((writeIndex + size) > bufSize){
+	if((writeIndex + size) > bufSize) {
 		// Not enough room in buffer
 		return 0;
 	}
-	if(size == 8){
+	if(size == 8) {
 		// As expected
 		uint64_t bytes = htole64(*(uint64_t*)(&data));
 		memcpy(buf+writeIndex, &bytes, size);
@@ -142,7 +142,7 @@ int ByteStream::write(const string& data) {
 int ByteStream::write(const char* data) {
 	// Write an entire string (including "\0")
 	int size = strlen(data)+1;
-	if((writeIndex + size) > bufSize){
+	if((writeIndex + size) > bufSize) {
 		// Not enough room in buffer
 		return 0;
 	}
@@ -151,7 +151,7 @@ int ByteStream::write(const char* data) {
 
 int ByteStream::write(const char* data, int length) {
 	// Write specified length
-	if((writeIndex + length) > bufSize){
+	if((writeIndex + length) > bufSize) {
 		// Not enough room in buffer
 		return 0;
 	}
@@ -160,14 +160,14 @@ int ByteStream::write(const char* data, int length) {
 	return length;
 }
 
-int ByteStream::read(int& data){
+int ByteStream::read(int& data) {
 	// Check size (should be 4 bytes)
 	int size = sizeof(int);
-	if((readIndex + size) > writeIndex){
+	if((readIndex + size) > writeIndex) {
 		// Not enough room in buffer
 		return 0;
 	}
-	if(size == 4){
+	if(size == 4) {
 		// As expected
 		uint32_t temp = le32toh(*(uint32_t*)(buf+readIndex));
 		data = *((int*)(&temp));
@@ -179,14 +179,14 @@ int ByteStream::read(int& data){
 	return size;
 }
 
-int ByteStream::read(float& data){
+int ByteStream::read(float& data) {
 	// Check size (should be 4 bytes)
 	int size = sizeof(float);
-	if((readIndex + size) > writeIndex){
+	if((readIndex + size) > writeIndex) {
 		// Not enough room in buffer
 		return 0;
 	}
-	if(size == 4){
+	if(size == 4) {
 		// As expected
 		uint32_t temp = le32toh(*(uint32_t*)(buf+readIndex));
 		data = *((float*)(&temp));
@@ -198,14 +198,14 @@ int ByteStream::read(float& data){
 	return size;
 }
 
-int ByteStream::read(double& data){
+int ByteStream::read(double& data) {
 	// Check size (should be 4 bytes)
 	int size = sizeof(double);
-	if((readIndex + size) > writeIndex){
+	if((readIndex + size) > writeIndex) {
 		// Not enough room in buffer
 		return 0;
 	}
-	if(size == 8){
+	if(size == 8) {
 		// As expected
 		uint64_t temp = le64toh(*(uint64_t*)(buf+readIndex));
 		data = *((double*)(&temp));
@@ -217,7 +217,7 @@ int ByteStream::read(double& data){
 	return size;
 }
 
-int ByteStream::read(string& data){
+int ByteStream::read(string& data) {
 	// Read all chars until '\0'
 	string temp(buf+readIndex);
 	data = temp;
@@ -226,8 +226,8 @@ int ByteStream::read(string& data){
 	return size;
 }
 
-int ByteStream::read(char* data, int length){
-	if((readIndex + length) > bufSize){
+int ByteStream::read(char* data, int length) {
+	if((readIndex + length) > bufSize) {
 		// Not enough room in buffer
 		return 0;
 	}
@@ -236,7 +236,7 @@ int ByteStream::read(char* data, int length){
 	return length;
 }
 
-void ByteStream::clear(){
+void ByteStream::clear() {
     memset(buf, 0, bufSize);
 	writeIndex = 0;
 	readIndex = 0;
@@ -254,7 +254,7 @@ ByteStream& ByteStream::operator=(const ByteStream& rhs) {
 ByteStream ByteStream::operator+(const ByteStream& rhs) {
 	int total = this->writeIndex - this->readIndex + rhs.writeIndex - rhs.readIndex;
 	int bufSize;
-	if(total > DEFAULT_BUF_SIZE){
+	if(total > DEFAULT_BUF_SIZE) {
 		// Buffer needs to be replaced
 		bufSize = total;
 	} else {
@@ -270,25 +270,25 @@ ByteStream ByteStream::operator+(const ByteStream& rhs) {
 
 /********************************** TCP *********************************/
 // SERVER
-Server_TCP::Server_TCP(){
+Server_TCP::Server_TCP() {
 
 }
 
-Server_TCP::Server_TCP(const char* host, const int port){
+Server_TCP::Server_TCP(const char* host, const int port) {
     init(host, port);
 }
 
-Server_TCP::~Server_TCP(){
+Server_TCP::~Server_TCP() {
 
 }
 
-int Server_TCP::init(const char* host, const int port){
+int Server_TCP::init(const char* host, const int port) {
     // Close connection if alread connected
     closeConn();
 
     // Create a socket
     listeningSock = socket(AF_INET, SOCK_STREAM, 0); // PF_INET instead?
-    if(listeningSock < 0){
+    if(listeningSock < 0) {
         perror("Socket creation unsuccessful");
         return 1;
     }
@@ -325,7 +325,7 @@ int Server_TCP::init(const char* host, const int port){
     return 0;
 }
 
-int Server_TCP::connect(){
+int Server_TCP::connect() {
     // Accept connection from TCP client
     socklen_t clientAddrLen = sizeof clientAddr;
     clientSock = ::accept(listeningSock, (struct sockaddr*)&clientAddr, &clientAddrLen);
@@ -339,7 +339,7 @@ int Server_TCP::connect(){
 
 
 // Sends a message
-int Server_TCP::send(ByteStream& stream){
+int Server_TCP::send(ByteStream& stream) {
     // Add message size to head of stream
     int status = 0;
     ByteStream send;
@@ -350,7 +350,7 @@ int Server_TCP::send(ByteStream& stream){
 
     // Start sending
     char* head = send.getBufHead();
-    while (tosend > 0){
+    while (tosend > 0) {
         ssize_t bytes = ::send(clientSock, head, tosend, 0);
         if (bytes <= 0) {
             // send() was not successful
@@ -364,7 +364,7 @@ int Server_TCP::send(ByteStream& stream){
     return 0;
 }
 
-int Server_TCP::receive(){
+int Server_TCP::receive() {
     // Initialze
     ByteStream sizeStream((int)(sizeof(int))); // for storing message size
     int msgSize;
@@ -372,7 +372,7 @@ int Server_TCP::receive(){
     
     // Read message size
     bytes = recv(clientSock, sizeStream.getBufHead(), sizeof(int), 0);
-    if(bytes != sizeof(int)){
+    if(bytes != sizeof(int)) {
         perror("Unable to read all bytes for message size");
         return 1;
     }
@@ -381,7 +381,7 @@ int Server_TCP::receive(){
     
     // Done reading message size; Read one byte from scoket
     clearBuf(); // clear buffer
-    while (msgSize > 0){
+    while (msgSize > 0) {
         bytes = recv(clientSock, getBufHead(), msgSize, 0);
         if (bytes <= 0) {
             // recv() was not successful; so stop
@@ -395,19 +395,19 @@ int Server_TCP::receive(){
 }
 
 // CLIENT
-Client_TCP::Client_TCP(){
+Client_TCP::Client_TCP() {
     
 }
 
-Client_TCP::Client_TCP(const char* host, const int port){
+Client_TCP::Client_TCP(const char* host, const int port) {
     init(host, port);
 }
 
-Client_TCP::~Client_TCP(){
+Client_TCP::~Client_TCP() {
     
 }
 
-int Client_TCP::init(const char* host, const int port){
+int Client_TCP::init(const char* host, const int port) {
     // Close connection if alread connected
     closeConn();
 
@@ -417,7 +417,7 @@ int Client_TCP::init(const char* host, const int port){
 
     // Create a socket
     sockfd = socket(AF_INET,SOCK_STREAM,0); // PF_INET instead?
-    if(sockfd < 0){
+    if(sockfd < 0) {
         // failed
         perror("Socket creation unsuccessful");
         return 1;
@@ -433,7 +433,7 @@ int Client_TCP::init(const char* host, const int port){
     ss >> temp;
     const char* portStr = temp.c_str();
     status = getaddrinfo(host, portStr, &serverAddr, &res);
-    if (status != 0){
+    if (status != 0) {
         // unable to get address info
         perror("getaddrinfo() unsuccessful");
         return 1;
@@ -441,13 +441,13 @@ int Client_TCP::init(const char* host, const int port){
     return 0;
 }
 
-int Client_TCP::connect(){
+int Client_TCP::connect() {
     // Connect with TCP Server
     int status = 0;
     do {
         status = ::connect(sockfd, res->ai_addr, res->ai_addrlen);
         //cout << res->ai_addr << endl;
-        if (status != 0){
+        if (status != 0) {
             // unable to connect to server
             perror("connect() unsuccessful");
             sleep(CONNECTION_WAIT_TIME);
@@ -457,7 +457,7 @@ int Client_TCP::connect(){
     return 0;
 }
 
-int Client_TCP::send(ByteStream& stream){
+int Client_TCP::send(ByteStream& stream) {
     // Add message size to head of stream
     int status = 0;
     ByteStream send;
@@ -468,7 +468,7 @@ int Client_TCP::send(ByteStream& stream){
 
     // Start sending
     char* head = send.getBufHead();
-    while (tosend > 0){
+    while (tosend > 0) {
         ssize_t bytes = ::send(sockfd, head, tosend, 0);
         if (bytes <= 0) {
             // send() was not successful
@@ -481,7 +481,7 @@ int Client_TCP::send(ByteStream& stream){
     return 0;
 }
 
-int Client_TCP::receive(){
+int Client_TCP::receive() {
     // Initialze
     ByteStream sizeStream((int)(sizeof(int))); // for storing message size
     int msgSize;
@@ -489,7 +489,7 @@ int Client_TCP::receive(){
     
     // Read message size
     bytes = recv(sockfd, sizeStream.getBufHead(), sizeof(int), 0);
-    if(bytes != sizeof(int)){
+    if(bytes != sizeof(int)) {
         perror("Unable to read all bytes for message size");
         return 1;
     }
@@ -498,7 +498,7 @@ int Client_TCP::receive(){
     
     // Done reading message size; Read one byte from scoket
     clearBuf(); // clear buffer
-    while (msgSize > 0){
+    while (msgSize > 0) {
         bytes = recv(sockfd, getBufHead(), msgSize, 0);
         if (bytes <= 0) {
             // recv() was not successful; so stop
@@ -515,25 +515,25 @@ int Client_TCP::receive(){
 /********************************** UDP *********************************/
 
 // SERVER
-Server_UDP::Server_UDP(){
+Server_UDP::Server_UDP() {
 
 }
 
-Server_UDP::Server_UDP(const char* host, const int port){
+Server_UDP::Server_UDP(const char* host, const int port) {
     init(host, port);
 }
 
-Server_UDP::~Server_UDP(){
+Server_UDP::~Server_UDP() {
 
 }
 
-int Server_UDP::init(const char* host, const int port){
+int Server_UDP::init(const char* host, const int port) {
     // close connection if alread connected
     closeConn();
     
     int status;
     clientSock = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP); // 0 to IPPROTO_UDP
-    if(clientSock < 0){
+    if(clientSock < 0) {
         perror("Socket creation unsuccessful");
         return 1;
     }
@@ -553,29 +553,29 @@ int Server_UDP::init(const char* host, const int port){
     listenAddr.sin_port = htons(port);
     listenAddr.sin_addr.s_addr = htonl(INADDR_ANY);
     status = ::bind(clientSock, (const sockaddr*)&listenAddr, sizeof(listenAddr));
-    if(status != 0){
+    if(status != 0) {
         perror("bind() unsuccessful");
         return 3;
     }
     return 0;
 }
 
-int Server_UDP::connect(){
+int Server_UDP::connect() {
     // No need to establish connection in UDP
     return 0;
 }
 
-int Server_UDP::send(ByteStream& stream){
+int Server_UDP::send(ByteStream& stream) {
     socklen_t slen = sizeof(clientAddr);
     ssize_t sent = sendto(clientSock, stream.getBufHead(), stream.getBufSize(), 0, (const sockaddr*)&clientAddr, slen);
-    if (sent < 0){
+    if (sent < 0) {
         perror("Sending unsuccessful");
         return 1;
     }
     return 0;
 }
 
-int Server_UDP::receive(){
+int Server_UDP::receive() {
     // Clear buffer
     clearBuf();
     ssize_t bytes;
@@ -584,7 +584,7 @@ int Server_UDP::receive(){
     // Read actual msg
     bytes = recvfrom(clientSock, getBufHead(), getBufSize(), 0, (sockaddr*)&clientAddr, &slen);
     stream.setWriteIndex(getBufSize());
-    if(bytes < 0){
+    if(bytes < 0) {
         perror("Receiving unsuccessful");
         return 1;
     }
@@ -593,24 +593,24 @@ int Server_UDP::receive(){
 
 
 // CLIENT
-Client_UDP::Client_UDP(){
+Client_UDP::Client_UDP() {
     
 }
 
-Client_UDP::Client_UDP(const char* host, const int port){
+Client_UDP::Client_UDP(const char* host, const int port) {
     init(host, port);
 }
 
-Client_UDP::~Client_UDP(){
+Client_UDP::~Client_UDP() {
     
 }
 
-int Client_UDP::init(const char* host, const int port){
+int Client_UDP::init(const char* host, const int port) {
     // close connection if alread connected
     closeConn();
     
     sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
-    if(sockfd < 0){
+    if(sockfd < 0) {
         // failed
         perror("Socket creation unsuccessful");
         return 1;
@@ -619,7 +619,7 @@ int Client_UDP::init(const char* host, const int port){
     memset((char *) &serverAddr, 0, sizeof(serverAddr));
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(port);
-    if (inet_aton(host, &serverAddr.sin_addr)==0){
+    if (inet_aton(host, &serverAddr.sin_addr)==0) {
         perror("Host decoding unsuccessful");
         return 2;
     }
@@ -631,18 +631,18 @@ int Client_UDP::connect() {
     return 0;
 }
 
-int Client_UDP::send(ByteStream& stream){
+int Client_UDP::send(ByteStream& stream) {
 
     socklen_t slen = sizeof(serverAddr);
     ssize_t sent = sendto(sockfd, stream.getBufHead(), stream.getBufSize(), 0, (const sockaddr*)&serverAddr, slen);
-    if (sent < 0){
+    if (sent < 0) {
         perror("Sending unsuccessful");
         return 1;
     }
     return 0;
 }
 
-int Client_UDP::receive(){
+int Client_UDP::receive() {
     // Clear buffer
     clearBuf();
     ssize_t bytes;
@@ -651,7 +651,7 @@ int Client_UDP::receive(){
     // Read actual msg
     bytes = recvfrom(sockfd, getBufHead(), getBufSize(), 0, (sockaddr*)&serverAddr, &slen);
     stream.setWriteIndex(getBufSize());
-    if(bytes < 0){
+    if(bytes < 0) {
         perror("Receiving unsuccessful");
         return 1;
     }

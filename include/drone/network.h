@@ -33,10 +33,10 @@ public:
     ~ByteStream();
 
     // Accessors
-    int getWriteIndex() {return writeIndex;};
-    int getReadIndex() {return readIndex;};
-    int getBufSize() {return bufSize;};
-    char* getBufHead() {return buf;};
+    int getWriteIndex() { return writeIndex; };
+    int getReadIndex() { return readIndex; };
+    int getBufSize() { return bufSize; };
+    char* getBufHead() { return buf; };
 
     // Mutators
     void setWriteIndex(int _writeIndex);
@@ -89,16 +89,16 @@ public:
         listeningSock = 0;
         clientSock = 0;
     }
-    Server(int bufSize):stream(bufSize){
+    Server(int bufSize):stream(bufSize) {
         listeningSock = 0;
         clientSock = 0;
     }
-	virtual ~Server(){
+	virtual ~Server() {
 		closeConn();
 	};
     
     // Initializers
-    int init(string& host, const int port) {return init(host.c_str(), port);};
+    int init(string& host, const int port) { return init(host.c_str(), port); };
     virtual int init(const char* host, const int port) = 0;
     
     // For accepting connectinos
@@ -106,7 +106,7 @@ public:
     
     // Sending
     int send(const string& msg) { return send(msg.c_str()); };
-    int send(const char* msg) {return send(msg, strlen(msg)+1);};
+    int send(const char* msg) { return send(msg, strlen(msg)+1); };
     int send(const char* msg, const size_t length) {
         ByteStream stream;
         stream.write(msg, length);
@@ -118,31 +118,31 @@ public:
     virtual int receive() = 0;
     
     // Closing connection
-    void closeConn(){
-    	if(clientSock != 0){
+    void closeConn() {
+    	if(clientSock != 0) {
     		close(clientSock);
     	}
-    	if(listeningSock != 0){
+    	if(listeningSock != 0) {
     		close(listeningSock);
     	}
     };
 
     // Reading from buffer
-    int read(int& data) {return stream.read(data);};
-    int read(float& data) {return stream.read(data);};
-    int read(double& data) {return stream.read(data);};
-    int read(string& data) {return stream.read(data);};
-    int read(char* data, int length) {return stream.read(data,length);};
+    int read(int& data) { return stream.read(data); };
+    int read(float& data) { return stream.read(data); };
+    int read(double& data) { return stream.read(data); };
+    int read(string& data) { return stream.read(data); };
+    int read(char* data, int length) { return stream.read(data,length); };
 
     // Byte stream handling
     void clearBuf() {stream.clear();};
 
     // Accessors
-    int getListeningSock(){ return listeningSock; };
-    int getClientSock(){ return clientSock; };
-    char* getBufHead() {return stream.getBufHead();};
-    int getBufSize() {return stream.getBufSize();};
-    ByteStream getStream() { return stream;};
+    int getListeningSock() { return listeningSock; };
+    int getClientSock() { return clientSock; };
+    char* getBufHead() { return stream.getBufHead(); };
+    int getBufSize() { return stream.getBufSize(); };
+    ByteStream getStream() { return stream; };
 
 protected:
     // Variables
@@ -162,15 +162,15 @@ public:
     Client() {
         sockfd = 0;
     }
-    Client(int bufSize):stream(bufSize){
+    Client(int bufSize):stream(bufSize) {
         sockfd = 0;
     }
-	virtual ~Client(){
+	virtual ~Client() {
 		closeConn();
 	};
 
     // Initializers
-    int init(string& host, const int port) {return init(host.c_str(), port);};
+    int init(string& host, const int port) { return init(host.c_str(), port); };
     virtual int init(const char* host, const int port) = 0;
 
     // For getting accepted
@@ -178,7 +178,7 @@ public:
     
     // Sending
     int send(const string& msg) { return send(msg.c_str()); };
-    int send(const char* msg) {return send(msg, strlen(msg)+1);};
+    int send(const char* msg) { return send(msg, strlen(msg)+1); };
     int send(const char* msg, const size_t length) {
         ByteStream stream;
         stream.write(msg, length);
@@ -190,27 +190,27 @@ public:
     virtual int receive() = 0;
     
     // Closing Connections
-    void closeConn(){
-    	if(sockfd != 0){
+    void closeConn() {
+    	if(sockfd != 0) {
     		close(sockfd);
     	}
     };
     
     // Reading from buffer
-    int read(int& data) {return stream.read(data);};
-    int read(float& data) {return stream.read(data);};
-    int read(double& data) {return stream.read(data);};
-    int read(string& data) {return stream.read(data);};
-    int read(char* data, int length) {return stream.read(data,length);};
+    int read(int& data) { return stream.read(data); };
+    int read(float& data) { return stream.read(data); };
+    int read(double& data) { return stream.read(data); };
+    int read(string& data) { return stream.read(data); };
+    int read(char* data, int length) { return stream.read(data,length); };
 
     // Byte stream handling
     void clearBuf() {stream.clear();};
 
     // Accessors
-    int getSockfd(){ return sockfd; };
-    char* getBufHead() {return stream.getBufHead();};
-    int getBufSize() {return stream.getBufSize();};
-    ByteStream getStream() {return stream;};
+    int getSockfd() { return sockfd; };
+    char* getBufHead() { return stream.getBufHead(); };
+    int getBufSize() { return stream.getBufSize(); };
+    ByteStream getStream() { return stream; };
     
 protected:
     // Variables

@@ -27,10 +27,12 @@ public:
   ~Vector();
 
   // Accessors
-  int getSize() {return size;};
+  int getSize() { return size; };
 
   double getNorm();
   void normalize();
+  
+  void fromMarkerData(const MarkerData& rhs);
   void print();
 
   Vector& operator=(const Vector& rhs);
@@ -41,7 +43,6 @@ public:
   Vector operator/(double rhs);
   Vector operator+(double rhs);
   Vector operator-(double rhs); 
-  Vector& operator=(const MarkerData& rhs);
 
 private:
   int size;
@@ -93,20 +94,33 @@ public:
   ~HomogeneousMatrix();
   
   double matrix[4][4];
-  double roll;
-  double pitch;
-  double yaw;
 
+  // Accessors
+  double getRoll() { return roll; };
+  double getPitch() { return pitch; };
+  double getYaw() { return yaw; };
+
+  // Mutators
+  void setRoll(double _roll);
+  void setPitch(double _pitch);
+  void setYaw(double _yaw);
+
+  // Matrix operations
   double getDeterminant();
   void transpose();
   HomogeneousMatrix getTranspose();
   void invert();
   HomogeneousMatrix getInverse(); // NOT IMPLEMENTED
-  void print();
-  void calibrate(CalibrationData calib);
-  DroneData toData();
-  void hm2rpy();
+  void calc_rpy();
 
+  // Prints the matrix; rpy printed in degrees
+  void print();
+  // Calibrates the rpy and distances
+  void calibrate(CalibrationData calib);
+
+  // Data conversions
+  DroneData toDroneData();
+  void fromMarkerData(const MarkerData& rhs);
 
   HomogeneousMatrix operator+(const HomogeneousMatrix& rhs);
   HomogeneousMatrix operator-(const HomogeneousMatrix& rhs);
@@ -117,9 +131,11 @@ public:
   HomogeneousMatrix operator/(const double rhs);
   HomogeneousMatrix& operator=(const RotationMatrix& rhs);
   HomogeneousMatrix& operator=(const Quaternion& quat);
-  HomogeneousMatrix& operator=(const MarkerData& rh);
 
 private:
+  double roll;
+  double pitch;
+  double yaw;
 
 };
 

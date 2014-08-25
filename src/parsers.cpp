@@ -34,12 +34,12 @@ ConfigParams::~ConfigParams() {
 }
 
 void ConfigParams::del() {
-	if(host != NULL){
-		delete host;
+	if(host != NULL) {
+		delete [] host;
 	}
 }
 
-ConfigParams& ConfigParams::operator=(const ConfigParams& rhs){
+ConfigParams& ConfigParams::operator=(const ConfigParams& rhs) {
 	// Initialize
 	del();
 
@@ -52,16 +52,19 @@ ConfigParams& ConfigParams::operator=(const ConfigParams& rhs){
 	return *this;
 }
 
-NetworkConfigParser::NetworkConfigParser(){
+NetworkConfigParser::NetworkConfigParser() {
 	currentLine = 1;
 }
 
-NetworkConfigParser::~NetworkConfigParser(){
+NetworkConfigParser::~NetworkConfigParser() {
 	;
 }
 
-int NetworkConfigParser::readConfig(const char* filePath){
+int NetworkConfigParser::readConfig(const char* filePath) {
 	// Initialize
+	if(data.host != NULL) {
+		delete [] data.host;
+	}
 	currentLine = 1;
 	data.state = 0;
 	data.host = NULL;
@@ -80,7 +83,7 @@ int NetworkConfigParser::readConfig(const char* filePath){
 	// Initialize
 	string line;
 	int status = 0;
-	while(getline(file, line)){
+	while(getline(file, line)) {
 		// Process line by line
 		status += parseLine(line);
 		currentLine += 1;
@@ -101,7 +104,7 @@ int NetworkConfigParser::readConfig(const char* filePath){
 		cout << "NETWORK not specified in file, specify either 'UDP' or 'TCP'" << endl;
 		status = 1;
 	}
-	if(status != 0){
+	if(status != 0) {
         cout << "Error reading config file" << endl;
 		return 1;
 	}
@@ -110,11 +113,11 @@ int NetworkConfigParser::readConfig(const char* filePath){
 	return 0;
 }
 
-int NetworkConfigParser::parseLine(const string& line){
+int NetworkConfigParser::parseLine(const string& line) {
 	int repeatedValue = 0; // flag for repeated config params
 
 	// Check if line should be ignored
-	if(line.empty() || line[0] == COMMENT_CHAR){
+	if(line.empty() || line[0] == COMMENT_CHAR) {
 		// Parsing a comment; ignore
 		return 0;
 	}
@@ -128,7 +131,7 @@ int NetworkConfigParser::parseLine(const string& line){
 	// Read name and value
 	entireLine >> name;
 	entireLine >> value;
-	if(!entireLine.eof()){
+	if(!entireLine.eof()) {
 		// Does not follow expected format
 		cout << "Error on line " << currentLine << ": too many arguments" << endl;
 		return 1;
@@ -140,7 +143,7 @@ int NetworkConfigParser::parseLine(const string& line){
 		} else {
 			string host;
 			status = extractHost(value, host);
-			if(status == 0){
+			if(status == 0) {
 				data.host = new char[host.length()+1];
 				strcpy(data.host, host.c_str());
 			}
@@ -151,7 +154,7 @@ int NetworkConfigParser::parseLine(const string& line){
 		} else {
 			int port;
 			status = extractPort(value, port);
-			if(status == 0){
+			if(status == 0) {
 				data.port = port;
 			}
 		}
@@ -161,7 +164,7 @@ int NetworkConfigParser::parseLine(const string& line){
 		} else {
 			int type;
 			status = extractType(value, type);
-			if(status == 0){
+			if(status == 0) {
 				data.type = type;
 			}
 		}
@@ -169,9 +172,9 @@ int NetworkConfigParser::parseLine(const string& line){
 		if(data.state != 0) {
 			repeatedValue = 1;
 		} else {
-			if(value == "ON" || value == "on" || value == "On" || value == "1"){
+			if(value == "ON" || value == "on" || value == "On" || value == "1") {
 				data.state = ON;
-			} else if (value == "OFF" || value == "off" || value == "Off" || value == "0"){
+			} else if (value == "OFF" || value == "off" || value == "Off" || value == "0") {
 				data.state = OFF;
 			} else {
 				status = 1;
@@ -181,12 +184,12 @@ int NetworkConfigParser::parseLine(const string& line){
 		status = 1;
 	}
 
-	if(status != 0){
+	if(status != 0) {
 		// Does not follow expected format
 		cout << "Error on line " << currentLine << ": invalid values" << endl;
 		return 1;
 	}
-	if(repeatedValue != 0){
+	if(repeatedValue != 0) {
 		// Does not follow expected format
 		cout << "Error on line " << currentLine << ": repeated configuration parameter" << endl;
 		return 1;
@@ -194,9 +197,9 @@ int NetworkConfigParser::parseLine(const string& line){
 	return 0;
 }
 
-int NetworkConfigParser::extractHost(const string& line, string& host){
+int NetworkConfigParser::extractHost(const string& line, string& host) {
 	// Check if localhost
-	if(line == "local_host" || line == "localhost" || line == "LOCAL_HOST" || line == "LOCALHOST"){
+	if(line == "local_host" || line == "localhost" || line == "LOCAL_HOST" || line == "LOCALHOST") {
 		host = "127.0.0.1";
 		return 0;
 	}
@@ -207,13 +210,13 @@ int NetworkConfigParser::extractHost(const string& line, string& host){
 	int i;
 
 	// Check that each number is 0-255 and has periods inbetween
-	for(i=0; i<3; i++){
+	for(i=0; i<3; i++) {
 		ss >> num;
-		if(num < 0 || num > 255){
+		if(num < 0 || num > 255) {
 			return 1;
 		}
 		ss >> period;
-		if(period != '.'){
+		if(period != '.') {
 			return 1;
 		}
 	}
@@ -226,7 +229,7 @@ int NetworkConfigParser::extractHost(const string& line, string& host){
 
 	// Check last number of host
 	ss >> num;
-	if(num < 1 || num > 255){
+	if(num < 1 || num > 255) {
 		return 1;
 	}
 
@@ -247,7 +250,7 @@ int NetworkConfigParser::extractPort(const string& line, int& port) {
 	stringstream ss(line);
 	int temp;
 	ss >> temp;
-	if(temp < 1 || temp > 65535){
+	if(temp < 1 || temp > 65535) {
 		return 1;
 	}
 
@@ -270,7 +273,7 @@ int NetworkConfigParser::extractType(const string& line, int& type) {
 	return 0;
 }
 
-int NetworkConfigParser::str2type(const string& str){
+int NetworkConfigParser::str2type(const string& str) {
 	if(str == "TCP" || str == "tcp" || str == "1" ) {
 		return TCP;
 	} else if(str == "UDP" || str == "udp" || str == "2") {
@@ -279,60 +282,60 @@ int NetworkConfigParser::str2type(const string& str){
 	return -1;
 }
 
-MarkerDataSet::MarkerDataSet(){
+MarkerDataSet::MarkerDataSet() {
 	array = NULL;
 }
 
-MarkerDataSet::MarkerDataSet(const MarkerDataSet& other){
+MarkerDataSet::MarkerDataSet(const MarkerDataSet& other) {
 	// Initialize
 	int i;
 	this->num = other.num;
 	this->array = new MarkerData*[this->num];
-	for(i=0; i<num; i++){
+	for(i=0; i<num; i++) {
     	array[i] = new MarkerData;
     	*(array[i]) = *(other.array[i]);
 	}
 }
 
-MarkerDataSet::~MarkerDataSet(){
+MarkerDataSet::~MarkerDataSet() {
 	deleteMarkers();
 }
 
-void MarkerDataSet::deleteMarkers(){
+void MarkerDataSet::deleteMarkers() {
 	// Delete all initialized markers
-	if(array != NULL){
+	if(array != NULL) {
     	int i;
-    	for(i=0; i<num; i++){
+    	for(i=0; i<num; i++) {
         	delete array[i];
     	}
     	delete [] array;
 	}
 }
 
-MarkerDataSet& MarkerDataSet::operator=(const MarkerDataSet& rhs){
+MarkerDataSet& MarkerDataSet::operator=(const MarkerDataSet& rhs) {
 	// Initialize
 	int i;
 	deleteMarkers();
 
 	this->num = rhs.num;
 	this->array = new MarkerData*[this->num];
-	for(i=0; i<num; i++){
+	for(i=0; i<num; i++) {
     	array[i] = new MarkerData;
     	*(array[i]) = *(rhs.array[i]);
 	}
 	return *this;
 }
 
-MarkerFileParser::MarkerFileParser(){
+MarkerFileParser::MarkerFileParser() {
 	currentLine = 1;
 	lineCount = 0;
 }
 
-MarkerFileParser::~MarkerFileParser(){
+MarkerFileParser::~MarkerFileParser() {
 	;
 }
 
-int MarkerFileParser::readMarkers(const char* markers){
+int MarkerFileParser::readMarkers(const char* markers) {
 	// Check that the file exists
 	ifstream file (markers);
 	if(!file.is_open()) {
@@ -347,20 +350,20 @@ int MarkerFileParser::readMarkers(const char* markers){
 	int validConfig = 1;
 
 	// Parse each line
-	while(getline(file, line)){
+	while(getline(file, line)) {
 		status += parseLine(line);
 		currentLine += 1;
 	}
 	int correctCount = data.num * 6 + 1;
-	if(lineCount < correctCount){
+	if(lineCount < correctCount) {
         cout << "Not enough data for " << data.num << " markers" << endl;
         status = 1;
 	}
-	if(lineCount > correctCount){
+	if(lineCount > correctCount) {
         cout << "Too much data for " << data.num << " markers" << endl;
         status = 1;
 	}
-	if(status != 0){
+	if(status != 0) {
         cout << "Error reading marker file" << endl;
 		return 1;
 	}
@@ -369,9 +372,9 @@ int MarkerFileParser::readMarkers(const char* markers){
 	return 0;
 }
 
-int MarkerFileParser::parseLine(const string& line){
+int MarkerFileParser::parseLine(const string& line) {
 	// Check if line should be ignored
-	if(line.empty() || line[0] == COMMENT_CHAR){
+	if(line.empty() || line[0] == COMMENT_CHAR) {
 		// Parsing a comment or whitespace - ignore
 		return 0;
 	}
@@ -380,15 +383,15 @@ int MarkerFileParser::parseLine(const string& line){
 	int status = 0;
 
 	// Read name and value
-	if(lineCount == 0){
+	if(lineCount == 0) {
 		status = parseMarkerNum(line);
-	} else if((lineCount-1)%6 < 3){
+	} else if((lineCount-1)%6 < 3) {
 		status = parseRow(line);
 	} else {
 		status = parseDistance(line);
 	}
 
-	if(status != 0){
+	if(status != 0) {
 		// Does not follow expected format
 		cout << "Error on line " << currentLine << ": invalid values" << endl;
 		return 1;
@@ -401,11 +404,11 @@ int MarkerFileParser::parseLine(const string& line){
 	return 0;
 }
 
-int MarkerFileParser::parseMarkerNum(const string& line){
+int MarkerFileParser::parseMarkerNum(const string& line) {
 	// Initialize
 	stringstream ss(line);
 	ss >> data.num;
-	if(!ss.eof() || data.num < 1){
+	if(!ss.eof() || data.num < 1) {
 		// invalid line
 		return 1;
 	}
@@ -413,45 +416,45 @@ int MarkerFileParser::parseMarkerNum(const string& line){
 	return 0;
 }
 
-int MarkerFileParser::parseRow(const string& line){
+int MarkerFileParser::parseRow(const string& line) {
 	// Initialize
 	stringstream ss(line);
-	if(index == 0){
+	if(index == 0) {
 		data.array[currentMarker] = new MarkerData;
 	}
 	ss >> data.array[currentMarker]->rm[index][0];
-	if(ss.fail()){
+	if(ss.fail()) {
 		return 1;
 	}
 	ss >> data.array[currentMarker]->rm[index][1];
-	if(ss.fail()){
+	if(ss.fail()) {
 		return 1;
 	}
 	ss >> data.array[currentMarker]->rm[index][2];
-	if(!ss.eof()){
+	if(!ss.eof()) {
 		return 1;
 	}
 	return 0;
 
 }
 
-int MarkerFileParser::parseDistance(const string& line){
+int MarkerFileParser::parseDistance(const string& line) {
 	// Initialize
 	stringstream ss(line);
-	if(index == 3){
+	if(index == 3) {
 		ss >> data.array[currentMarker]->dist_x;
-	} else if(index == 4){
+	} else if(index == 4) {
 		ss >> data.array[currentMarker]->dist_y;
-	} else if(index == 5){
+	} else if(index == 5) {
 		ss >> data.array[currentMarker]->dist_z;
 	}
-	if(!ss.eof()){
+	if(!ss.eof()) {
 		return 1;
 	}
 	return 0;
 }
 
-int serverInit(Server*& server, ConfigParams* params){
+int serverInit(Server*& server, ConfigParams* params) {
 	// Initialize
 	int status = 0;
 	string host;
@@ -459,7 +462,7 @@ int serverInit(Server*& server, ConfigParams* params){
 	int type;
 
 	// Check that the server is to be running
-	if(params->state == OFF){
+	if(params->state == OFF) {
 		cout << "Server OFF" << endl;
 		server = NULL;
 		return 0;
@@ -471,11 +474,11 @@ int serverInit(Server*& server, ConfigParams* params){
 	type = params->type;
 
 	// Initialize server
-	if(type == TCP){
+	if(type == TCP) {
 		cout << "Server is running on " << host << " at port "
 			 << port << " using TCP connection" << endl;
 		server = new Server_TCP();
-	} else if(type == UDP){
+	} else if(type == UDP) {
 		cout << "Server is running on " << host << " at port "
 			 << port << " using UDP connection" << endl;
 		server = new Server_UDP();
@@ -484,7 +487,7 @@ int serverInit(Server*& server, ConfigParams* params){
 	return status;
 }
 
-int clientInit(Client*& client, ConfigParams* params){
+int clientInit(Client*& client, ConfigParams* params) {
 	// Initialize
 	int status = 0;
 	string host;
@@ -492,7 +495,7 @@ int clientInit(Client*& client, ConfigParams* params){
 	int type;
 
 	// Check that the client is to be running
-	if(params->state == OFF){
+	if(params->state == OFF) {
 		cout << "Client OFF" << endl;
 		client = NULL;
 		return 0;
@@ -504,11 +507,11 @@ int clientInit(Client*& client, ConfigParams* params){
 	type = params->type;
 
 	// Initialize client
-	if(type == TCP){
+	if(type == TCP) {
 		cout << "Client is running on " << host << " at port "
 			 << port << " using TCP connection" << endl;
 		client = new Client_TCP();
-	} else if(type == UDP){
+	} else if(type == UDP) {
 		cout << "Client is running on " << host << " at port "
 			 << port << " using UDP connection" << endl;
 		client = new Client_UDP();

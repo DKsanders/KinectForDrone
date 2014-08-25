@@ -19,12 +19,12 @@ public:
   ~CalibrationData();
 
   // Accessors
-  double getX() {return xOffset;};
-  double getY() {return yOffset;};
-  double getZ() {return zOffset;};
-  double getRoll() {return rollOffset;};
-  double getPitch() {return pitchOffset;};
-  double getYaw() {return yawOffset;};
+  double getX() { return xOffset; };
+  double getY() { return yOffset; };
+  double getZ() { return zOffset; };
+  double getRoll() { return rollOffset; };
+  double getPitch() { return pitchOffset; };
+  double getYaw() { return yawOffset; };
 
   // Callibrating
   void calibrate(double x, double y, double z, double roll, double pitch, double yaw);
@@ -60,7 +60,7 @@ public:
   string comment;
 
   // Accessors
-  int getSeq() {return seq;};
+  int getSeq() { return seq; };
 
   // Mutators
   void setSeq(int _seq);

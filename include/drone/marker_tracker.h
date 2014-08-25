@@ -37,9 +37,11 @@ struct SharedData{
   int id; // use to check if new data or not
 
   // Flags
-  int serverReady;
-  int clientReady;
-  int done;
+  bool serverReady;
+  bool clientReady;
+  bool done;
+  
+  int threadsRunning;
 
   string etc; // data
 };
@@ -53,13 +55,13 @@ namespace drone
     ~DataProcessor ();
     
     // Accessors
-    int getSeqFromDrone() {return seqFromDrone;};
-    Client* getClient() {return client;};
-    Server* getServer() {return server;};
-    ConfigParams* getClientParams() {return clientParams;};
-    ConfigParams* getServerParams() {return serverParams;};
-    SharedData* getSharedData() {return sharedData;};
-    MarkerDataSet* getMarkerDataSet() {return markers;};
+    int getSeqFromDrone() { return seqFromDrone; };
+    Client* getClient() { return client; };
+    Server* getServer() { return server; };
+    ConfigParams* getClientParams() { return clientParams; };
+    ConfigParams* getServerParams() { return serverParams; };
+    SharedData* getSharedData() { return sharedData; };
+    MarkerDataSet* getMarkerDataSet() { return markers; };
 
     // Mutators
     void setClient(Client* _client);

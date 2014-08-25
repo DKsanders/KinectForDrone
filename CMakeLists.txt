@@ -110,6 +110,8 @@ add_executable(marker_tracker src/marker_tracker.cpp src/data_handling.cpp src/n
 target_link_libraries(marker_tracker ${catkin_LIBRARIES})
 add_dependencies(marker_tracker drone_generate_messages_cpp)
 
+set(CMAKE_BUILD_TYPE Debug)
+
 #############
 ## Install ##
 #############

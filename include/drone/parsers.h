@@ -70,7 +70,7 @@ public:
   ~NetworkConfigParser();
 
   // Accessors
-  ConfigParams getConfig() {return data;};;
+  ConfigParams getConfig() { return data; };;
 
   /**
    * Reads in a network config file and parses it
@@ -120,7 +120,7 @@ struct MarkerDataSet{
   int num;
   MarkerData** array; // array of pointers to markers
 
-  MarkerData getMarker(int id) {return *(array[id]);};;
+  MarkerData getMarker(int id) { return *(array[id]); };;
 
   void deleteMarkers();
 
@@ -134,7 +134,7 @@ public:
   ~MarkerFileParser();
 
   // Accessors
-  MarkerDataSet getMarkers() {return data;};
+  MarkerDataSet getMarkers() { return data; };
   
   /**
    * Reads in a marker data file and parses it
