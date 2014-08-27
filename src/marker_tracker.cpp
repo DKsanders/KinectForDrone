@@ -10,7 +10,7 @@
  * Author: David Sanders <david.sanders@mail.utoronto.ca>
  *
  * Bugs/Issues
- *  -Program exits with an error (possibly freeing memory twice?)
+ *  - No known bugs
  *
  * Areas of Improvemnet
  *  - Replace my_matrix functions with proper matrix labraries or tf functions in ROS

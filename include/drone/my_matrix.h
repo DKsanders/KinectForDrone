@@ -109,8 +109,6 @@ public:
   double getDeterminant();
   void transpose();
   HomogeneousMatrix getTranspose();
-  void invert();
-  HomogeneousMatrix getInverse(); // NOT IMPLEMENTED
   void calc_rpy();
 
   // Prints the matrix; rpy printed in degrees

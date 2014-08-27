@@ -462,16 +462,6 @@ HomogeneousMatrix HomogeneousMatrix::getTranspose() {
     return temp;
 }
 
-void HomogeneousMatrix::invert() {
-    ;
-}
-
-HomogeneousMatrix HomogeneousMatrix::getInverse() {
-    HomogeneousMatrix temp = *this;
-    temp.invert();
-    return temp;
-}
-
 void HomogeneousMatrix::print() {
     cout << "---------------------------------------------------------------------"<< endl;
     cout << "Homogeneous Matrix: "  << endl;
